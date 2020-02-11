@@ -1,0 +1,34 @@
+本程序是一个运行在 Linux 中、基于 ygopro 的卡片数据开发的卡片查询器，可以按卡号、卡名以及描述文字搜索卡片。
+
+如果没有单独下载卡片及卡图数据，建议电脑中安装 Koishipro。
+
+* 功能
+- 支持按卡片名搜索
+
+- 支持按卡片描述文字搜索
+
+- 支持按卡片码搜索
+
+* 安装
+依赖：
+
+- Python >= 3.7
+
+- PyQt
+
+快速安装：
+
+#+begin_example
+  cd /opt
+  sudo https://github.com/1u4nx/yugioh_card_query.git
+  cd yugioh_card_query
+  sudo sh install.sh
+#+end_example
+
+* 使用说明
+本程序仅是个查询程序，不包括卡片数据和图片，因此在使用之前需要做一定的配置，建议在使用前先安装 Koishipro。
+
+首次使用，请先打开：工具 > 设置，“卡图路径”选择 Koishipro 安装目录下的 pics 文件夹；“卡库路径”选择安装目录下的 cards.cdb。
+
+* 程序截图
+[[file:images/gui.png]]
