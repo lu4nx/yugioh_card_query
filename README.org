@@ -20,7 +20,7 @@
 
 #+begin_example
   cd /opt
-  sudo https://github.com/1u4nx/yugioh_card_query.git
+  sudo git clone https://github.com/1u4nx/yugioh_card_query.git
   cd yugioh_card_query
   sudo sh install.sh
 #+end_example
