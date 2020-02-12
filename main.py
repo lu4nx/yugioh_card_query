@@ -7,7 +7,7 @@ import json
 from sqlite3 import DatabaseError
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QCursor, QPixmap, QDesktopServices
+from PyQt5.QtGui import QCursor, QPixmap, QDesktopServices, QColor
 from PyQt5.QtWidgets import (
     QMenu,
     QDialog,
@@ -18,11 +18,16 @@ from PyQt5.QtWidgets import (
     QFileDialog
 )
 
-from core.card_database import CardDatabase, get_card_short_type
+from core.card_database import (
+    LimitCard,
+    CardDatabase,
+    get_card_short_type
+)
+
 from ui import Ui_MainWindow, Ui_settings, Ui_about
 
 
-__VERSION__ = "0.1"
+__VERSION__ = "0.2"
 __OFFICIAL_WEBSITE__ = "https://github.com/1u4nx/yugioh_card_query"
 
 
@@ -31,6 +36,7 @@ class UserSetting(object):
         self.user_config_file = f"{os.getenv('HOME')}/.ygo_card_query.conf"
         self.card_pictures_path = None
         self.card_database_path = None
+        self.limit_card_path = None
         self.setting_flag = False
 
     def load(self):
@@ -42,14 +48,16 @@ class UserSetting(object):
             config_content = json.load(f)
             self.card_pictures_path = config_content["card_pictures_path"]
             self.card_database_path = config_content["card_database_path"]
+            self.limit_card_path = config_content["limit_card_path"]
 
         self.setting_flag = True
 
-    def write(self, card_pictures_path, card_database_path):
+    def write(self, card_pictures_path, card_database_path, limit_card_path):
         with open(self.user_config_file, "w") as f:
             f.write(json.dumps({
                 "card_pictures_path": card_pictures_path,
-                "card_database_path": card_database_path
+                "card_database_path": card_database_path,
+                "limit_card_path": limit_card_path
             }))
 
     def get_card_database_path(self):
@@ -57,6 +65,9 @@ class UserSetting(object):
 
     def get_card_pictures_path(self):
         return self.card_pictures_path
+
+    def get_limit_card_path(self):
+        return self.limit_card_path
 
     def is_setting(self):
         return self.setting_flag
@@ -82,9 +93,12 @@ class SettingUI(Ui_settings):
         self.save_setting_button.clicked.connect(self.save_setting)
         self.card_pictures_path_edit.setText(CONF.get_card_pictures_path())
         self.card_database_path_edit.setText(CONF.get_card_database_path())
+        self.limit_card_file_path_edit.setText(CONF.get_limit_card_path())
         self.select_pic_dir_button.clicked.connect(self.select_pictures_dir)
         self.select_database_file_button.clicked.connect(
             self.select_database_file)
+        self.select_limit_card_file_button.clicked.connect(
+            self.select_limit_card_file)
 
     def show(self):
         self.dialog.show()
@@ -103,10 +117,18 @@ class SettingUI(Ui_settings):
                                                      "(*.cdb);;All Files (*)")
         self.card_database_path_edit.setText(choose_file)
 
+    def select_limit_card_file(self):
+        choose_file, _ = QFileDialog.getOpenFileName(self.dialog,
+                                                     "选择禁卡数据",
+                                                     "/",
+                                                     "(*.conf);;All Files (*)")
+        self.limit_card_file_path_edit.setText(choose_file)
+
     def save_setting(self):
         card_pictures_path = self.card_pictures_path_edit.text()
         card_database_path = self.card_database_path_edit.text()
-        CONF.write(card_pictures_path, card_database_path)
+        limit_card_path = self.limit_card_file_path_edit.text()
+        CONF.write(card_pictures_path, card_database_path, limit_card_path)
         QMessageBox.information(self.dialog, "提示", "保存成功，重启程序后生效",
                                 QMessageBox.Ok)
 
@@ -149,6 +171,11 @@ class MainUI(Ui_MainWindow, QMainWindow):
         else:
             self.card_database = CardDatabase(CONF.get_card_database_path(),
                                               CONF.get_card_pictures_path())
+            try:
+                self.limit_card = LimitCard(CONF.get_limit_card_path())
+            except ValueError:
+                QMessageBox.information(self, "提示",
+                                        "禁卡数据加载失败，请检查", QMessageBox.Ok)
 
     def open_official_website(self):
         QDesktopServices.openUrl(QtCore.QUrl(__OFFICIAL_WEBSITE__))
@@ -217,8 +244,21 @@ class MainUI(Ui_MainWindow, QMainWindow):
         for i in search_result:
             card_number, card_name, card_type = i
             short_type_name = get_card_short_type(i[2])
-            item = CardItem(f"[{short_type_name}]{card_name}",
-                            card_number=card_number)
+            limit_count = self.limit_card.get_limit(card_number)
+
+            if limit_count is None:
+                item = CardItem(f"[{short_type_name}]{card_name}",
+                                card_number=card_number)
+            elif limit_count == 0:
+                item = CardItem(f"[{short_type_name}][禁]{card_name}",
+                                card_number=card_number)
+                item.setForeground(QColor("red"))
+            else:
+                item = CardItem(
+                    f"[{short_type_name}][限{limit_count}]{card_name}",
+                    card_number=card_number)
+                item.setForeground(QColor("red"))
+
             self.search_result_widget.addItem(item)
 
     def show_card(self, item):

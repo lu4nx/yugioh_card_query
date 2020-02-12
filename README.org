@@ -9,6 +9,8 @@
 
 - 支持按卡片码搜索
 
+- 支持卡片使用限制展示
+
 * 安装
 依赖：
 
@@ -30,7 +32,25 @@
 
 可以在当前桌面环境的程序菜单里找到“游戏王离线查卡器”或在终端运行“yugioh_card_query”命令。
 
-首次使用，请先打开：工具 > 设置，“卡图路径”选择 Koishipro 安装目录下的 pics 文件夹；“卡库路径”选择安装目录下的 cards.cdb。
+首次使用，请先打开“工具” > “设置”，依次设置为 Koishipro 安装目录下对应的文件：
+
+- 卡图路径：默认为目录下的 pics 文件夹；
+
+- 卡库路径：默认为目录下的 cards.cdb；
+
+- 禁卡数据：默认为目录下的 lflist.conf。
 
 * 程序截图
-[[file:images/gui.png]]
+按名称搜索：
+[[file:images/gui1.png]]
+
+按卡号检索：
+[[file:images/gui2.png]]
+
+卡片描述搜索：
+[[file:images/gui3.png]]
+
+卡片限制展示：
+[[file:images/gui4.png]]
+
+

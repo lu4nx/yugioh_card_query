@@ -1,5 +1,6 @@
 # Author: lx@shellcodes.org
 
+import re
 import sqlite3
 
 
@@ -130,7 +131,35 @@ class Card(object):
         return self.get_type().startswith("陷阱")
 
 
+class LimitCard(object):
+    """限制卡数据库"""
+
+    def __init__(self, card_data_path):
+        self.card_data_path = card_data_path
+        # 数据结构：{卡号: 限制数}
+        self.card_data = {}
+        self.init_card_data()
+
+    def init_card_data(self):
+        with open(self.card_data_path, "r") as f:
+            for line in f:
+                if not self.verify_line_data(line):
+                    continue
+
+                number, limit, _ = line.split(maxsplit=2)
+                self.card_data[int(number)] = int(limit)
+
+    def get_limit(self, number):
+        return self.card_data.get(number, None)
+
+    def verify_line_data(self, data):
+        """卡片码最短 5 位，判断行数据前 5 个字符是否位数字"""
+        return re.match(r"^\d{5,}", data) is not None
+
+
 class CardDatabase(object):
+    """完整的卡片数据库"""
+
     def __init__(self, card_db_path, card_pictures_path):
         self.card_db_path = card_db_path
         self.card_pictures_path = card_pictures_path
