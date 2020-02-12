@@ -174,7 +174,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         QMessageBox.information(self, "提示", "请先配置数据：工具 > 设置", QMessageBox.Ok)
 
     def set_card_picture_show(self, path=None):
-        app_base_dir = os.path.dirname(os.path.abspath(__file__))
+        app_base_dir = os.path.dirname(os.path.realpath(__file__))
         defalut_pic = f"{app_base_dir}/images/card_default_picture.png"
 
         if (path is None) or (not os.path.exists(path)):
