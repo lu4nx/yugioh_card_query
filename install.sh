@@ -1,6 +1,11 @@
 current_dir=`pwd`
 dst_file=/usr/bin/yugioh_card_query
 
+if [ `whoami` != "root" ];then
+    echo '请使用管理员身份'
+    exit
+fi
+
 pip3 install PyQt5
 
 if [ ! -e ${dst_file} ]; then
