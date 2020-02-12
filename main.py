@@ -7,8 +7,9 @@ import json
 from sqlite3 import DatabaseError
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QPixmap, QDesktopServices
+from PyQt5.QtGui import QCursor, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import (
+    QMenu,
     QDialog,
     QMainWindow,
     QApplication,
@@ -131,18 +132,43 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.setting_action.triggered.connect(self.process_setting_dialog)
         self.about_action.triggered.connect(self.process_about_dialog)
         self.official_website_action.triggered.connect(
-            lambda: QDesktopServices.openUrl(QtCore.QUrl(__OFFICIAL_WEBSITE__))
+            self.open_official_website
         )
         self.search_button.clicked.connect(self.do_search)
         # 响应回车事件
         self.search_button.setShortcut(QtCore.Qt.Key_Return)
         self.set_card_picture_show()
+        # 注册卡图的右键菜单
+        self.card_picture.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.card_picture.customContextMenuRequested.connect(
+            self.show_picture_menu
+        )
 
         if not CONF.is_setting():
             self.please_setting()
         else:
             self.card_database = CardDatabase(CONF.get_card_database_path(),
                                               CONF.get_card_pictures_path())
+
+    def open_official_website(self):
+        QDesktopServices.openUrl(QtCore.QUrl(__OFFICIAL_WEBSITE__))
+
+    def show_picture_menu(self):
+        self.menu = QMenu(self)
+        self.copy_pic = self.menu.addAction("复制")
+        self.save_pic = self.menu.addAction("另存为...")
+        self.copy_pic.triggered.connect(self.copy_card_pic2clipboard)
+        self.save_pic.triggered.connect(self.save_picture)
+        self.menu.exec(QCursor.pos())
+
+    def save_picture(self):
+        choose_file, _ = QFileDialog.getSaveFileName(self, "另存为",
+                                                     "*.png", "(*.png)")
+        self.card_picture.pixmap().save(choose_file, "png")
+
+    def copy_card_pic2clipboard(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setPixmap(self.card_picture.pixmap())
 
     def please_setting(self):
         QMessageBox.information(self, "提示", "请先配置数据：工具 > 设置", QMessageBox.Ok)

@@ -118,16 +118,16 @@ class Card(object):
         return self.desc
 
     def is_monster(self):
-        return self.get_type().find("怪兽") > -1
+        return self.get_type().startswith("怪兽")
 
     def is_link_monster(self):
-        return self.is_monster() and self.get_type().find("连接") > -1
+        return self.is_monster() and self.get_type().startswith("连接")
 
     def is_spell(self):
-        return self.get_type().find("魔法") > -1
+        return self.get_type().startswith("魔法")
 
     def is_trap(self):
-        return self.get_type().find("陷阱") > -1
+        return self.get_type().startswith("陷阱")
 
 
 class CardDatabase(object):
