@@ -12,7 +12,7 @@
 - 支持卡片使用限制展示
 
 * 安装
-依赖：
+系统依赖：
 
 - Python >= 3.7
 
@@ -42,15 +42,19 @@
 
 * 程序截图
 按名称搜索：
+
 [[file:images/gui1.png]]
 
 按卡号检索：
+
 [[file:images/gui2.png]]
 
 卡片描述搜索：
+
 [[file:images/gui3.png]]
 
 卡片限制展示：
+
 [[file:images/gui4.png]]
 
 
