@@ -10,6 +10,8 @@ def get_card_type(type_code):
     if (type_code & 0x1) == 0x1:
         if (type_code & 0x4000000) == 0x4000000:
             card_type = "怪兽 连接"
+        elif (type_code & 0x1000000) == 0x1000000:
+            card_type = "怪兽 灵摆"
         elif (type_code & 0x40) == 0x40:
             card_type = "怪兽 融合"
         elif (type_code & 0x20) == 0x20:
@@ -107,6 +109,10 @@ class Card(object):
         # 连接怪兽没有等级，而数据库中的等级值是连接数
         if self.is_link_monster():
             return None
+        elif self.is_pendulum_monster():
+            # 灵摆怪兽的 level 字段中，只有低两位保存的等级
+            return self.level & 0xff
+
         return self.level
 
     def get_link_number(self):
@@ -122,7 +128,10 @@ class Card(object):
         return self.get_type().startswith("怪兽")
 
     def is_link_monster(self):
-        return self.is_monster() and self.get_type().startswith("连接")
+        return self.is_monster() and self.get_type().endswith("连接")
+
+    def is_pendulum_monster(self):
+        return self.is_monster() and self.get_type().endswith("灵摆")
 
     def is_spell(self):
         return self.get_type().startswith("魔法")

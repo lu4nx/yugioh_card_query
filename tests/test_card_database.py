@@ -22,6 +22,11 @@ class TestCardType(TestCase):
         self.assertEqual(get_card_type(0x41),
                          "怪兽 融合")
 
+    def test_is_pendulum_monster(self):
+        """测试灵摆怪兽"""
+        self.assertEqual(get_card_type(0x1000021),
+                         "怪兽 灵摆")
+
     def test_effect_monster(self):
         """测试效果怪兽"""
         self.assertEqual(get_card_type(0x2000021),
