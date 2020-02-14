@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # author: lu4nx <www.shellcodes.org>
 
+import re
 import os
 import sys
 import json
@@ -27,7 +28,7 @@ from core.card_database import (
 from ui import Ui_MainWindow, Ui_settings, Ui_about
 
 
-__VERSION__ = "0.2"
+__VERSION__ = "0.3"
 __OFFICIAL_WEBSITE__ = "https://github.com/1u4nx/yugioh_card_query"
 
 
@@ -77,10 +78,33 @@ CONF = UserSetting()
 CONF.load()
 
 
+class InputHistory(object):
+    """单链表的历史记录保存"""
+
+    def __init__(self):
+        self.inputs = []
+
+    def add(self, item):
+        self.inputs.append(item)
+
+    def back(self):
+        try:
+            return self.inputs.pop()
+        except IndexError:
+            return None
+
+
 class CardItem(QListWidgetItem):
     def __init__(self, name, card_number):
         super(CardItem, self).__init__(name)
         self.card_number = card_number
+
+    def get_card_name(self):
+        # 替换掉名字前的“[怪]”、“[限1]”等标签
+        return re.sub(r"\[.{1,3}\]", "", self.text())
+
+    def get_number(self):
+        return self.card_number
 
 
 class SettingUI(Ui_settings):
@@ -165,6 +189,16 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.card_picture.customContextMenuRequested.connect(
             self.show_picture_menu
         )
+        # 注册搜索结果的右键菜单
+        self.search_result_widget.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu
+        )
+        self.search_result_widget.customContextMenuRequested.connect(
+            self.show_search_result_menu
+        )
+        # 搜索历史
+        self.history = InputHistory()
+        self.history_button.clicked.connect(self.back_history)
 
         if not CONF.is_setting():
             self.please_setting()
@@ -180,13 +214,40 @@ class MainUI(Ui_MainWindow, QMainWindow):
     def open_official_website(self):
         QDesktopServices.openUrl(QtCore.QUrl(__OFFICIAL_WEBSITE__))
 
+    def back_history(self):
+        # 先要弹出一次当前的搜索关键字，才能取到上一次的搜索关键字，因此调用两次 back 方法
+        self.history.back()
+        search_keyword = self.history.back()
+
+        if not search_keyword:
+            return
+        self.search_keyword_edit.setText(search_keyword)
+        self.do_search()
+
     def show_picture_menu(self):
-        self.menu = QMenu(self)
-        self.copy_pic = self.menu.addAction("复制")
-        self.save_pic = self.menu.addAction("另存为...")
-        self.copy_pic.triggered.connect(self.copy_card_pic2clipboard)
-        self.save_pic.triggered.connect(self.save_picture)
-        self.menu.exec(QCursor.pos())
+        menu = QMenu(self)
+        copy_pic = menu.addAction("复制")
+        save_pic = menu.addAction("另存为...")
+        copy_pic.triggered.connect(self.copy_card_pic2clipboard)
+        save_pic.triggered.connect(self.save_picture)
+        menu.exec(QCursor.pos())
+
+    def show_search_result_menu(self):
+        def open_taobao():
+            select = self.search_result_widget.selectedItems()
+            # 对空列表右击时，select 为空
+            if not select:
+                return
+
+            item = select[0]
+            url = f"https://s.taobao.com/search?q={item.get_card_name()}"
+            # 可以不用 URL 转码，浏览器会自动转
+            QDesktopServices.openUrl(QtCore.QUrl(url))
+
+        menu = QMenu(self)
+        search_taobao = menu.addAction("淘宝搜卡")
+        search_taobao.triggered.connect(open_taobao)
+        menu.exec(QCursor.pos())
 
     def save_picture(self):
         choose_file, _ = QFileDialog.getSaveFileName(self, "另存为",
@@ -210,9 +271,9 @@ class MainUI(Ui_MainWindow, QMainWindow):
             card_pic_file = QPixmap(path)
 
         # 调整图片大小，缩放到和 label 一样大
-        self.card_picture.setPixmap(
-            card_pic_file.scaled(self.card_picture.width(),
-                                 self.card_picture.height()))
+        self.card_picture.setPixmap(card_pic_file.scaled(
+            self.card_picture.width(), self.card_picture.height())
+        )
 
     def do_search(self):
         if not CONF.is_setting():
@@ -223,6 +284,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.search_result_widget.itemClicked.connect(self.show_card)
         search_type = self.search_type.currentText()
         search_keyword = self.search_keyword_edit.text()
+        self.history.add(search_keyword)
 
         if search_keyword == "":
             QMessageBox.information(self, "提示", "请输入关键字", QMessageBox.Ok)
@@ -262,7 +324,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
             self.search_result_widget.addItem(item)
 
     def show_card(self, item):
-        card_number = item.card_number
+        card_number = item.get_number()
         picture_path = f"{CONF.get_card_pictures_path()}/{card_number}.jpg"
         self.set_card_picture_show(picture_path)
         card_info = self.card_database.get_card_info(card_number)

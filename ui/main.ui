@@ -17,9 +17,9 @@
    <widget class="QLineEdit" name="search_keyword_edit">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>130</x>
       <y>10</y>
-      <width>311</width>
+      <width>271</width>
       <height>30</height>
      </rect>
     </property>
@@ -93,6 +93,22 @@
       <width>256</width>
       <height>501</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="history_button">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>10</y>
+      <width>31</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
+    <property name="text">
+     <string>⇦</string>
     </property>
    </widget>
   </widget>
