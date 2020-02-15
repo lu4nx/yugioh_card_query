@@ -214,19 +214,24 @@ class CardDatabase(object):
 """
 
     def monster_info_desc(self, card_obj):
-        if card_obj.is_monster() and card_obj.is_link_monster():
-            return f"""
-LINK：{card_obj.get_link_number()}，属性：{card_obj.get_attribute()}
+        if not card_obj.is_monster():
+            return ""
 
-攻击：{card_obj.get_attack()}
-"""
-        elif card_obj.is_monster():
-            return f"""
-等级：{card_obj.get_level()}，属性：{card_obj.get_attribute()}
+        level_field = "等级"
+        level_field_value = card_obj.get_level()
+
+        # LINK 怪兽和超量怪兽是没有等级的
+        if card_obj.is_monster() and card_obj.is_link_monster():
+            level_field = "LINK"
+            level_field_value = card_obj.get_link_number()
+        elif card_obj.is_monster() and card_obj.is_xyz_monster():
+            level_field = "阶级"
+
+        return f"""
+{level_field}：{level_field_value}，属性：{card_obj.get_attribute()}
 
 攻击：{card_obj.get_attack()}，防御：{card_obj.get_defense()}
 """
-        return ""
 
     def match_query(self, search_keyword, field):
         assert field in ("卡名", "卡码", "描述",)
