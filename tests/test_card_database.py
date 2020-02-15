@@ -15,7 +15,7 @@ class TestCardType(TestCase):
     def test_link_monster(self):
         """测试连接怪兽"""
         self.assertEqual(get_card_type(0x4000021),
-                         "怪兽 连接")
+                         "怪兽 连接 效果")
 
     def test_fusion_monster(self):
         """测试融合怪兽"""
@@ -25,7 +25,22 @@ class TestCardType(TestCase):
     def test_is_pendulum_monster(self):
         """测试灵摆怪兽"""
         self.assertEqual(get_card_type(0x1000021),
-                         "怪兽 灵摆")
+                         "怪兽 灵摆 效果")
+
+    def test_is_ritual_monster(self):
+        """测试仪式怪兽"""
+        self.assertEqual(get_card_type(0x81),
+                         "怪兽 仪式")
+
+    def test_is_xyz_monster(self):
+        """测试超量怪兽"""
+        self.assertEqual(get_card_type(0x800021),
+                         "怪兽 超量 效果")
+
+    def test_is_synchro_monster(self):
+        """测试同调怪兽"""
+        self.assertEqual(get_card_type(0x2021),
+                         "怪兽 同调 效果")
 
     def test_effect_monster(self):
         """测试效果怪兽"""
@@ -47,6 +62,11 @@ class TestCardType(TestCase):
         self.assertEqual(get_card_type(0x10002),
                          "魔法 速攻")
 
+    def test_ritual_spell(self):
+        """测试仪式魔法卡"""
+        self.assertEqual(get_card_type(0x82),
+                         "魔法 仪式")
+
     def test_continuous_spell(self):
         """测试永久魔法卡"""
         self.assertEqual(get_card_type(0x20002),
@@ -66,6 +86,11 @@ class TestCardType(TestCase):
         """测试永久陷阱卡"""
         self.assertEqual(get_card_type(0x20004),
                          "陷阱 永久")
+
+    def test_counter_trap(self):
+        """测试反击陷阱卡"""
+        self.assertEqual(get_card_type(0x100004),
+                         "陷阱 反击")
 
 
 class TestCardAttribute(TestCase):

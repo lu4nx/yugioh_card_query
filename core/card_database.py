@@ -1,41 +1,63 @@
-# Author: lx@shellcodes.org
+# author: lx@shellcodes.org
 
 import re
 import sqlite3
 
 
 def get_card_type(type_code):
-    """判断卡片类型"""
-    card_type = None
-    if (type_code & 0x1) == 0x1:
-        if (type_code & 0x4000000) == 0x4000000:
-            card_type = "怪兽 连接"
-        elif (type_code & 0x1000000) == 0x1000000:
-            card_type = "怪兽 灵摆"
-        elif (type_code & 0x40) == 0x40:
-            card_type = "怪兽 融合"
-        elif (type_code & 0x20) == 0x20:
-            card_type = "怪兽 效果"
-        else:
-            card_type = "怪兽"
-    elif (type_code & 0x2) == 0x2:
-        if (type_code & 0x10000) == 0x10000:
-            card_type = "魔法 速攻"
-        elif (type_code & 0x20000) == 0x20000:
-            card_type = "魔法 永久"
-        elif (type_code & 0x40000) == 0x40000:
-            card_type = "魔法 装备"
-        elif (type_code & 0x80000) == 0x80000:
-            card_type = "魔法 场地"
-        else:
-            card_type = "魔法"
-    elif (type_code & 0x4) == 0x4:
-        if (type_code & 0x20000) == 0x20000:
-            card_type = "陷阱 永久"
-        else:
-            card_type = "陷阱"
+    """判断卡片类型
 
-    return card_type
+    参考引擎代码：script/constant.lua
+    """
+    card_type_codes_map = {
+        0x1: {
+            0x4000000: "连接",
+            0x1000000: "灵摆",
+            0x800000: "超量",
+            0x2000: "同调",
+            0x80: "仪式",
+            0x40: "融合",
+            0x20: "效果"
+        },
+        0x2: {
+            0x80000: "场地",
+            0x40000: "装备",
+            0x20000: "永久",
+            0x10000: "速攻",
+            0x80: "仪式",
+        },
+        0x4: {
+            0x100000: "反击",
+            0x20000: "永久",
+        }
+    }
+
+    type_attributes = []
+    type_choose = None
+
+    for code in card_type_codes_map:
+        main_type = type_code & code
+        if main_type == 0x1:
+            type_attributes.append("怪兽")
+            type_choose = card_type_codes_map[code]
+            break
+        elif main_type == 0x2:
+            type_attributes.append("魔法")
+            type_choose = card_type_codes_map[code]
+            break
+        elif main_type == 0x4:
+            type_attributes.append("陷阱")
+            type_choose = card_type_codes_map[code]
+            break
+
+    # 断言不属于三大卡种类的情况
+    assert type_choose is not None
+
+    for code in type_choose:
+        if (type_code & code) == code:
+            type_attributes.append(type_choose[code])
+
+    return " ".join(type_attributes)
 
 
 def get_card_attribute(attribute_code):
@@ -128,10 +150,19 @@ class Card(object):
         return self.get_type().startswith("怪兽")
 
     def is_link_monster(self):
-        return self.is_monster() and self.get_type().endswith("连接")
+        return self.is_monster() and self.get_type().find("连接") > -1
+
+    def is_ritual_monster(self):
+        return self.is_monster() and self.get_type().find("仪式") > -1
 
     def is_pendulum_monster(self):
-        return self.is_monster() and self.get_type().endswith("灵摆")
+        return self.is_monster() and self.get_type().find("灵摆") > -1
+
+    def is_xyz_monster(self):
+        return self.is_monster() and self.get_type().find("超量") > -1
+
+    def is_synchro_monster(self):
+        return self.is_monster() and self.get_type().find("同调") > -1
 
     def is_spell(self):
         return self.get_type().startswith("魔法")
