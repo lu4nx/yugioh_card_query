@@ -10,24 +10,33 @@ def get_card_type(type_code):
     """
     card_type_codes_map = {
         0x1: {
-            0x4000000: "连接",
-            0x1000000: "灵摆",
-            0x800000: "超量",
-            0x2000: "同调",
-            0x80: "仪式",
-            0x40: "融合",
-            0x20: "效果"
+            "name": "怪兽",
+            "sub_type": {
+                0x4000000: "连接",
+                0x1000000: "灵摆",
+                0x800000: "超量",
+                0x2000: "同调",
+                0x80: "仪式",
+                0x40: "融合",
+                0x20: "效果"
+            }
         },
         0x2: {
-            0x80000: "场地",
-            0x40000: "装备",
-            0x20000: "永久",
-            0x10000: "速攻",
-            0x80: "仪式",
+            "name": "魔法",
+            "sub_type": {
+                0x80000: "场地",
+                0x40000: "装备",
+                0x20000: "永久",
+                0x10000: "速攻",
+                0x80: "仪式",
+            }
         },
         0x4: {
-            0x100000: "反击",
-            0x20000: "永久",
+            "name": "陷阱",
+            "sub_type": {
+                0x100000: "反击",
+                0x20000: "永久",
+            }
         }
     }
 
@@ -36,17 +45,11 @@ def get_card_type(type_code):
 
     for code in card_type_codes_map:
         main_type = type_code & code
-        if main_type == 0x1:
-            type_attributes.append("怪兽")
-            type_choose = card_type_codes_map[code]
-            break
-        elif main_type == 0x2:
-            type_attributes.append("魔法")
-            type_choose = card_type_codes_map[code]
-            break
-        elif main_type == 0x4:
-            type_attributes.append("陷阱")
-            type_choose = card_type_codes_map[code]
+
+        if main_type:
+            name = card_type_codes_map.get(main_type)["name"]
+            type_attributes.append(name)
+            type_choose = card_type_codes_map[code]["sub_type"]
             break
 
     # 断言不属于三大卡种类的情况
@@ -77,11 +80,12 @@ def get_card_short_type(type_code):
 
     if card_type.find("怪兽") > -1:
         return "怪"
-    elif card_type.find("魔") > -1:
+    elif card_type.find("魔法") > -1:
         return "魔"
     elif card_type.find("陷阱") > -1:
         return "陷"
-    return "?"
+
+    raise TypeError("Card type error")
 
 
 class Card(object):
@@ -199,8 +203,7 @@ class CardDatabase(object):
             attribute=item[4],
             level=item[5],
             attack=item[6],
-            defense=item[7]
-            )
+            defense=item[7])
 
         monster_info = self.monster_info_desc(card)
         return f"""{card.get_name()}（{card.get_number()}）
