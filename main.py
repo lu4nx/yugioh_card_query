@@ -19,13 +19,10 @@ from PyQt5.QtWidgets import (
     QFileDialog
 )
 
-from core.card_database import (
-    LimitCard,
-    CardDatabase,
-    get_card_short_type
-)
+from core.limit_card import LimitCard
+from core.card_database import CardDatabase, get_card_short_type
 
-from ui import Ui_MainWindow, Ui_settings, Ui_about
+from ui import Ui_MainWindow, Ui_settings, Ui_about, Ui_count
 
 
 __VERSION__ = "0.3"
@@ -107,6 +104,64 @@ class CardItem(QListWidgetItem):
         return self.card_number
 
 
+class CountUI(Ui_count):
+    def __init__(self):
+        self.dialog = QDialog()
+        self.dialog.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
+        self.dialog.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setupUi(self.dialog)
+        self.db = CardDatabase(CONF.get_card_database_path())
+
+    def count_card(self):
+        all_type = self.db.count_all_type()
+        types_count = {
+            "怪兽卡": {},
+            "魔法卡": {},
+            "陷阱卡": {}
+        }
+
+        for name, total in all_type:
+            if name.startswith("怪兽"):
+                if name == "怪兽":
+                    name = "普通"
+                name = name.replace("怪兽 ", "")
+                types_count["怪兽卡"].setdefault(name, 0)
+                types_count["怪兽卡"][name] += total
+            elif name.startswith("魔法"):
+                if name == "魔法":
+                    name = "普通"
+                name = name.replace("魔法 ", "")
+                types_count["魔法卡"].setdefault(name, 0)
+                types_count["魔法卡"][name] += total
+            elif name.startswith("陷阱"):
+                if name == "陷阱":
+                    name = "普通"
+                name = name.replace("陷阱 ", "")
+                types_count["陷阱卡"].setdefault(name, 0)
+                types_count["陷阱卡"][name] += total
+
+        return types_count
+
+    def pretty_types_count(self):
+        count_result = self.count_card()
+        card_total = 0
+
+        ret = ""
+        for type_name in count_result:
+            ret += f"{type_name}：\n"
+            for sub_type_name in count_result[type_name]:
+                sub_type_total = count_result[type_name][sub_type_name]
+                ret += f"        {sub_type_name}：{sub_type_total}\n"
+                card_total += sub_type_total
+
+        return f"总卡数：{card_total}\n\n{ret}"
+
+    def show(self):
+        self.count_info_text.setText(self.pretty_types_count())
+        self.dialog.show()
+        self.dialog.exec()
+
+
 class SettingUI(Ui_settings):
     def __init__(self, parent=None):
         self.dialog = QDialog()
@@ -175,8 +230,9 @@ class MainUI(Ui_MainWindow, QMainWindow):
         # 禁止改变窗口大小
         self.setFixedSize(self.width(), self.height())
         # 菜单选项响应注册
-        self.setting_action.triggered.connect(self.process_setting_dialog)
-        self.about_action.triggered.connect(self.process_about_dialog)
+        self.setting_action.triggered.connect(lambda: SettingUI().show())
+        self.card_count_action.triggered.connect(lambda: CountUI().show())
+        self.about_action.triggered.connect(lambda: AboutUI().show())
         self.official_website_action.triggered.connect(
             self.open_official_website
         )
@@ -203,8 +259,8 @@ class MainUI(Ui_MainWindow, QMainWindow):
         if not CONF.is_setting():
             self.please_setting()
         else:
-            self.card_database = CardDatabase(CONF.get_card_database_path(),
-                                              CONF.get_card_pictures_path())
+            self.card_database = CardDatabase(CONF.get_card_database_path())
+
             try:
                 self.limit_card = LimitCard(CONF.get_limit_card_path())
             except ValueError:
@@ -329,12 +385,6 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.set_card_picture_show(picture_path)
         card_info = self.card_database.get_card_info(card_number)
         self.card_info.setText(card_info)
-
-    def process_setting_dialog(self):
-        SettingUI().show()
-
-    def process_about_dialog(self):
-        AboutUI().show()
 
 
 if __name__ == "__main__":
