@@ -146,6 +146,12 @@ class Card(object):
             return self.level
         return None
 
+    def get_xyz_rank(self):
+        """返回超量怪兽的阶级"""
+        if self.is_xyz_monster():
+            return self.level
+        return None
+
     def get_desc(self):
         return self.desc
 
@@ -221,11 +227,12 @@ class CardDatabase(object):
         level_field_value = card_obj.get_level()
 
         # LINK 怪兽和超量怪兽是没有等级的
-        if card_obj.is_monster() and card_obj.is_link_monster():
+        if card_obj.is_link_monster():
             level_field = "LINK"
             level_field_value = card_obj.get_link_number()
-        elif card_obj.is_monster() and card_obj.is_xyz_monster():
+        elif card_obj.is_xyz_monster():
             level_field = "阶级"
+            level_field_value = card_obj.get_xyz_rank()
 
         return f"""
 {level_field}：{level_field_value}，属性：{card_obj.get_attribute()}
