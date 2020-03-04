@@ -1,6 +1,7 @@
 from unittest import TestCase
 from core.card_database import (
     get_card_type,
+    get_monster_race,
     get_card_attribute,
     get_card_short_type
 )
@@ -113,3 +114,12 @@ class TestCardTypeShortName(TestCase):
         self.assertEqual(get_card_short_type(0x4000021), "怪")
         self.assertEqual(get_card_short_type(0x40002), "魔")
         self.assertEqual(get_card_short_type(0x20004), "陷")
+
+
+class TestMonsterRace(TestCase):
+    """测试怪兽的种族"""
+
+    def test_monster_race(self):
+        self.assertIsNone(get_monster_race(0))
+        self.assertEqual(get_monster_race(0x2000), "龙")
+        self.assertEqual(get_monster_race(0x2), "魔法师")

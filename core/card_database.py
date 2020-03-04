@@ -3,11 +3,43 @@
 import sqlite3
 
 
-def get_card_type(type_code):
-    """判断卡片类型
+"""参考引擎代码：script/constant.lua"""
 
-    参考引擎代码：script/constant.lua
-    """
+
+def get_monster_race(race_code):
+    """获得怪兽种族信息"""
+    return {
+        0x1ffffff: "全种族",
+        0x1: "战士",
+        0x2: "魔法师",
+        0x4: "天使",
+        0x8: "恶魔",
+        0x10: "不死",
+        0x20: "机械",
+        0x40: "水",
+        0x80: "炎",
+        0x100: "岩石",
+        0x200: "鸟兽",
+        0x400: "植物",
+        0x800: "昆虫",
+        0x1000: "雷",
+        0x2000: "龙",
+        0x4000: "兽",
+        0x8000: "兽战士",
+        0x10000: "恐龙",
+        0x20000: "鱼",
+        0x40000: "海龙",
+        0x80000: "爬虫类",
+        0x100000: "念动力",
+        0x200000: "幻神兽",
+        0x400000: "创造神",
+        0x800000: "幻龙",
+        0x1000000: "电子界",
+    }.get(race_code, None)
+
+
+def get_card_type(type_code):
+    """判断卡片类型"""
     card_type_codes_map = {
         0x1: {
             "name": "怪兽",
@@ -93,6 +125,7 @@ class Card(object):
         self.number = argv.get("number")
         self.name = argv.get("name")
         self.type = argv.get("card_type")
+        self.race = argv.get("race")
         self.attribute = argv.get("attribute")
         self.attack = argv.get("attack")
         self.defense = argv.get("defense")
@@ -114,6 +147,10 @@ class Card(object):
         card_attribute = get_card_attribute(self.attribute)
         assert card_attribute is not None
         return card_attribute
+
+    def get_race(self):
+        if self.is_monster():
+            return get_monster_race(self.race)
 
     def get_defense(self):
         # 防御力无限，或没有防御力的，数据库保存的值为 -2
@@ -188,11 +225,12 @@ class CardDatabase(object):
         return [(get_card_type(i[0]), i[1],) for i in list(cursor)]
 
     def get_card_info(self, card_number):
-        cursor = self.conn.execute(("select texts.id, texts.name, texts.desc,"
-                                    "datas.type, datas.attribute, datas.level,"
-                                    "datas.atk, datas.def from texts, datas "
-                                    "where texts.id=? "
-                                    "and texts.id = datas.id"),
+        cursor = self.conn.execute((
+            "select texts.id, texts.name, texts.desc,"
+            "datas.type, datas.attribute, datas.level,"
+            "datas.atk, datas.def, datas.race from texts, datas "
+            "where texts.id=? "
+            "and texts.id = datas.id"),
                                    (card_number,))
         item = cursor.fetchone()
         card = Card(
@@ -203,7 +241,8 @@ class CardDatabase(object):
             attribute=item[4],
             level=item[5],
             attack=item[6],
-            defense=item[7])
+            defense=item[7],
+            race=item[8])
 
         monster_info = self.monster_info_desc(card)
         return f"""{card.get_name()}（{card.get_number()}）
@@ -228,7 +267,7 @@ class CardDatabase(object):
             level_field = "阶级"
 
         return f"""
-{level_field}：{level_field_value}，属性：{card_obj.get_attribute()}
+{level_field}：{level_field_value}，{card_obj.get_race()}族，属性：{card_obj.get_attribute()}
 
 攻击：{card_obj.get_attack()}，防御：{card_obj.get_defense()}
 """
