@@ -289,20 +289,21 @@ class MainUI(Ui_MainWindow, QMainWindow):
         menu.exec(QCursor.pos())
 
     def show_search_result_menu(self):
-        def open_taobao():
-            select = self.search_result_widget.selectedItems()
-            # 对空列表右击时，select 为空
-            if not select:
-                return
-
-            item = select[0]
-            url = f"https://s.taobao.com/search?q={item.get_card_name()}"
+        def open_url(url):
             # 可以不用 URL 转码，浏览器会自动转
             QDesktopServices.openUrl(QtCore.QUrl(url))
 
         menu = QMenu(self)
         search_taobao = menu.addAction("淘宝搜卡")
-        search_taobao.triggered.connect(open_taobao)
+        search_ourocg = menu.addAction("OurOcg")
+        select = self.search_result_widget.selectedItems()
+
+        if not select:
+            return
+
+        item = select[0]
+        search_taobao.triggered.connect(lambda: open_url(f"https://s.taobao.com/search?q={item.get_card_name()}"))
+        search_ourocg.triggered.connect(lambda: open_url(f"https://www.ourocg.cn/search/{item.get_number()}"))
         menu.exec(QCursor.pos())
 
     def save_picture(self):
