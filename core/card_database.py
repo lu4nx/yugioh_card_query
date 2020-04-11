@@ -3,124 +3,120 @@
 import sqlite3
 
 
-"""参考引擎代码：script/constant.lua"""
+class CardBase(object):
+    """参考引擎代码：script/constant.lua"""
 
+    def get_monster_race(self, race_code):
+        return {
+            0x1ffffff: "全种族",
+            0x1: "战士",
+            0x2: "魔法师",
+            0x4: "天使",
+            0x8: "恶魔",
+            0x10: "不死",
+            0x20: "机械",
+            0x40: "水",
+            0x80: "炎",
+            0x100: "岩石",
+            0x200: "鸟兽",
+            0x400: "植物",
+            0x800: "昆虫",
+            0x1000: "雷",
+            0x2000: "龙",
+            0x4000: "兽",
+            0x8000: "兽战士",
+            0x10000: "恐龙",
+            0x20000: "鱼",
+            0x40000: "海龙",
+            0x80000: "爬虫类",
+            0x100000: "念动力",
+            0x200000: "幻神兽",
+            0x400000: "创造神",
+            0x800000: "幻龙",
+            0x1000000: "电子界",
+        }.get(race_code, None)
 
-def get_monster_race(race_code):
-    """获得怪兽种族信息"""
-    return {
-        0x1ffffff: "全种族",
-        0x1: "战士",
-        0x2: "魔法师",
-        0x4: "天使",
-        0x8: "恶魔",
-        0x10: "不死",
-        0x20: "机械",
-        0x40: "水",
-        0x80: "炎",
-        0x100: "岩石",
-        0x200: "鸟兽",
-        0x400: "植物",
-        0x800: "昆虫",
-        0x1000: "雷",
-        0x2000: "龙",
-        0x4000: "兽",
-        0x8000: "兽战士",
-        0x10000: "恐龙",
-        0x20000: "鱼",
-        0x40000: "海龙",
-        0x80000: "爬虫类",
-        0x100000: "念动力",
-        0x200000: "幻神兽",
-        0x400000: "创造神",
-        0x800000: "幻龙",
-        0x1000000: "电子界",
-    }.get(race_code, None)
-
-
-def get_card_type(type_code):
-    """判断卡片类型"""
-    card_type_codes_map = {
-        0x1: {
-            "name": "怪兽",
-            "sub_type": {
-                0x4000000: "连接",
-                0x1000000: "灵摆",
-                0x800000: "超量",
-                0x2000: "同调",
-                0x80: "仪式",
-                0x40: "融合",
-                0x20: "效果"
-            }
-        },
-        0x2: {
-            "name": "魔法",
-            "sub_type": {
-                0x80000: "场地",
-                0x40000: "装备",
-                0x20000: "永久",
-                0x10000: "速攻",
-                0x80: "仪式",
-            }
-        },
-        0x4: {
-            "name": "陷阱",
-            "sub_type": {
-                0x100000: "反击",
-                0x20000: "永久",
+    def get_card_type(self, type_code):
+        """判断卡片类型"""
+        card_type_codes_map = {
+            0x1: {
+                "name": "怪兽",
+                "sub_type": {
+                    0x4000000: "连接",
+                    0x1000000: "灵摆",
+                    0x800000: "超量",
+                    0x2000: "同调",
+                    0x80: "仪式",
+                    0x40: "融合",
+                    0x20: "效果"
+                }
+            },
+            0x2: {
+                "name": "魔法",
+                "sub_type": {
+                    0x80000: "场地",
+                    0x40000: "装备",
+                    0x20000: "永久",
+                    0x10000: "速攻",
+                    0x80: "仪式",
+                }
+            },
+            0x4: {
+                "name": "陷阱",
+                "sub_type": {
+                    0x100000: "反击",
+                    0x20000: "永久",
+                }
             }
         }
-    }
 
-    type_attributes = []
-    type_choose = None
+        type_attributes = []
+        type_choose = None
 
-    for code in card_type_codes_map:
-        main_type = type_code & code
+        for code in card_type_codes_map:
+            main_type = type_code & code
 
-        if main_type:
-            name = card_type_codes_map.get(main_type)["name"]
-            type_attributes.append(name)
-            type_choose = card_type_codes_map[code]["sub_type"]
-            break
+            if main_type:
+                name = card_type_codes_map.get(main_type)["name"]
+                type_attributes.append(name)
+                type_choose = card_type_codes_map[code]["sub_type"]
+                break
 
-    # 断言不属于三大卡种类的情况
-    assert type_choose is not None
+        # 断言不属于三大卡种类的情况
+        assert type_choose is not None
 
-    for code in type_choose:
-        if (type_code & code) == code:
-            type_attributes.append(type_choose[code])
+        for code in type_choose:
+            if (type_code & code) == code:
+                type_attributes.append(type_choose[code])
 
-    return " ".join(type_attributes)
+        return " ".join(type_attributes)
 
+    def get_card_attribute(self, attribute_code):
+        return {
+            0x01: "地",
+            0x02: "水",
+            0x04: "炎",
+            0x08: "风",
+            0x10: "光",
+            0x20: "暗",
+            0x40: "神"
+        }.get(attribute_code, None)
 
-def get_card_attribute(attribute_code):
-    return {
-        0x01: "地",
-        0x02: "水",
-        0x04: "炎",
-        0x08: "风",
-        0x10: "光",
-        0x20: "暗",
-        0x40: "神"
-    }.get(attribute_code, None)
+    def get_card_short_type(self, type_code):
+        """获得卡片类型短名"""
+        card_type = self.get_card_type(type_code)
 
+        if card_type.find("怪兽") > -1:
+            return "怪"
+        elif card_type.find("魔法") > -1:
+            return "魔"
+        elif card_type.find("陷阱") > -1:
+            return "陷"
 
-def get_card_short_type(type_code):
-    """获得卡片类型短名"""
-    card_type = get_card_type(type_code)
-
-    if card_type.find("怪兽") > -1:
-        return "怪"
-    elif card_type.find("魔法") > -1:
-        return "魔"
-    elif card_type.find("陷阱") > -1:
-        return "陷"
-
-    raise TypeError("Card type error")
+        raise TypeError("Card type error")
 
 
-class Card(object):
+class Card(CardBase):
     def __init__(self, **argv):
         self.number = argv.get("number")
         self.name = argv.get("name")
@@ -139,18 +135,21 @@ class Card(object):
         return self.name
 
     def get_type(self):
-        card_type = get_card_type(self.type)
+        card_type = self.get_card_type(self.type)
         assert card_type is not None
         return card_type
 
+    def get_short_type(self):
+        return self.get_card_short_type(self.type)
+
     def get_attribute(self):
-        card_attribute = get_card_attribute(self.attribute)
+        card_attribute = self.get_card_attribute(self.attribute)
         assert card_attribute is not None
         return card_attribute
 
     def get_race(self):
         if self.is_monster():
-            return get_monster_race(self.race)
+            return self.get_monster_race(self.race)
 
     def get_defense(self):
         # 防御力无限，或没有防御力的，数据库保存的值为 -2
@@ -228,7 +227,8 @@ class CardDatabase(object):
     def count_all_type(self):
         sql = "select type, count(1) from datas group by type"
         cursor = self.conn.execute(sql)
-        return [(get_card_type(i[0]), i[1],) for i in list(cursor)]
+        return [(CardBase().get_card_type(i[0]), i[1],)
+                for i in list(cursor)]
 
     def get_card_info(self, card_number):
         cursor = self.conn.execute((
@@ -284,21 +284,33 @@ class CardDatabase(object):
 
         if field == "卡名":
             cursor = self.conn.execute(
-                ("select texts.id, texts.name, datas.type from "
-                 "texts, datas where name like ? and texts.id=datas.id"),
+                ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
+                 "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
+                 "where name like ? and texts.id=datas.id"),
                 (f"%{search_keyword}%",))
         elif field == "卡码":
             cursor = self.conn.execute(
-                ("select texts.id, texts.name, datas.type from "
-                 "texts, datas where texts.id=? and texts.id=datas.id"),
+                ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
+                 "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
+                 "where texts.id=? and texts.id=datas.id"),
                 (search_keyword,))
         elif field == "描述":
             cursor = self.conn.execute(
-                ("select texts.id, texts.name, datas.type from "
-                 "texts, datas where texts.desc like ? and texts.id=datas.id"),
+                ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
+                 "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
+                 "where texts.desc like ? and texts.id=datas.id"),
                 (f"%{search_keyword}%",))
 
-        return list(cursor)
+        for i in cursor:
+            yield Card(number=i[0],
+                       name=i[1],
+                       card_type=i[2],
+                       race=i[3],
+                       attribute=i[4],
+                       attack=i[5],
+                       defense=i[6],
+                       level=i[7],
+                       desc=i[8])
 
     def __del__(self):
         self.conn.close()

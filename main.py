@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
 )
 
 from core.limit_card import LimitCard
-from core.card_database import CardDatabase, get_card_short_type
+from core.card_database import CardDatabase
 
 from ui import Ui_MainWindow, Ui_settings, Ui_about, Ui_count
 
@@ -361,21 +361,19 @@ class MainUI(Ui_MainWindow, QMainWindow):
             return
 
         for i in search_result:
-            card_number, card_name, card_type = i
-            short_type_name = get_card_short_type(i[2])
-            limit_count = self.limit_card.get_limit(card_number)
+            limit_count = self.limit_card.get_limit_number(i.get_number())
 
             if limit_count is None:
-                item = CardItem(f"[{short_type_name}]{card_name}",
-                                card_number=card_number)
+                item = CardItem(f"[{i.get_short_type()}]{i.get_name()}",
+                                card_number=(i.get_number()))
             elif limit_count == 0:
-                item = CardItem(f"[{short_type_name}][禁]{card_name}",
-                                card_number=card_number)
+                item = CardItem(f"[{i.get_short_type()}][禁]{i.get_name()}",
+                                card_number=(i.get_number()))
                 item.setForeground(QColor("red"))
             else:
                 item = CardItem(
-                    f"[{short_type_name}][限{limit_count}]{card_name}",
-                    card_number=card_number)
+                    f"[{i.get_short_type()}][限{limit_count}]{i.get_name()}",
+                    card_number=(i.get_number()))
                 item.setForeground(QColor("red"))
 
             self.search_result_widget.addItem(item)

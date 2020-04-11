@@ -35,18 +35,21 @@ class LimitCard(object):
                     self.limit_name_list.append(list_name)
                     self.limit_cards.setdefault(list_name, {})
                     continue
-                if not self.verify_limit_data(line):
+                if not self.is_card_number(line):
                     continue
                 if current_list is not None:
                     number, limit, _ = line.split(maxsplit=2)
                     self.limit_cards[current_list][int(number)] = int(limit)
 
-    def verify_limit_data(self, data):
-        """卡片码最短 5 位，判断行数据前 5 个字符是否位数字"""
+    def is_card_number(self, data):
+        """卡片码最短 5 位，判断行数据前 5 个字符是否位数字
+
+        :returns: True 或 False
+        """
         return re.match(r"^\d{5,}", data) is not None
 
-    def get_limit(self, number):
+    def get_limit_number(self, card_number):
         # NOTE: 按文件格式规律，第一个是 OCG 的限卡表，默认只查 OCG 的
         # 暂时没考虑 TCG
         new_list = self.limit_name_list[0]
-        return self.limit_cards[new_list].get(number, None)
+        return self.limit_cards[new_list].get(card_number, None)
