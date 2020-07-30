@@ -338,7 +338,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
             return
 
         self.search_result_widget.clear()
-        self.search_result_widget.itemClicked.connect(self.show_card)
+        self.search_result_widget.itemSelectionChanged.connect(self.show_card)
         search_type = self.search_type.currentText()
         search_keyword = self.search_keyword_edit.text()
         self.history.add(search_keyword)
@@ -378,12 +378,15 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
             self.search_result_widget.addItem(item)
 
-    def show_card(self, item):
-        card_number = item.get_number()
-        picture_path = f"{CONF.get_card_pictures_path()}/{card_number}.jpg"
-        self.set_card_picture_show(picture_path)
-        card_info = self.card_database.get_card_info(card_number)
-        self.card_info.setText(card_info)
+    def show_card(self):
+        items = self.search_result_widget.selectedItems()
+        # 列表没支持多选，因此这里循环实际暂时无意义，和取第一个元素是一样的
+        for item in items:
+            card_number = item.get_number()
+            picture_path = f"{CONF.get_card_pictures_path()}/{card_number}.jpg"
+            self.set_card_picture_show(picture_path)
+            card_info = self.card_database.get_card_info(card_number)
+            self.card_info.setText(card_info)
 
 
 if __name__ == "__main__":
