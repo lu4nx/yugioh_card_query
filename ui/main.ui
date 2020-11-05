@@ -14,16 +14,6 @@
    <string>游戏王离线查卡器</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="search_keyword_edit">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>10</y>
-      <width>271</width>
-      <height>30</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLabel" name="card_picture">
     <property name="geometry">
      <rect>
@@ -40,7 +30,7 @@
    <widget class="QPushButton" name="search_button">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>450</x>
       <y>10</y>
       <width>85</width>
       <height>27</height>
@@ -66,7 +56,7 @@
     </item>
     <item>
      <property name="text">
-      <string>卡码</string>
+      <string>卡密</string>
      </property>
     </item>
     <item>
@@ -111,6 +101,19 @@
      <string>⇦</string>
     </property>
    </widget>
+   <widget class="QComboBox" name="search_keyword_edit">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>10</y>
+      <width>311</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -118,7 +121,7 @@
      <x>0</x>
      <y>0</y>
      <width>550</width>
-     <height>26</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="tools_menu">

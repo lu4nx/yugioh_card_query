@@ -152,7 +152,7 @@ class Card(CardBase):
             return self.get_monster_race(self.race)
 
     def get_defense(self):
-        # 防御力无限，或没有防御力的，数据库保存的值为 -2
+        # 没有防御力的，数据库保存的值为 -2
         if self.defense == -2:
             return "?"
         # 连接怪兽没有防御力
@@ -161,7 +161,7 @@ class Card(CardBase):
         return self.defense
 
     def get_attack(self):
-        # 攻击力无限的，或没有攻击力的，数据库保存的值为 -2
+        # 没有攻击力的，数据库保存的值为 -2
         if self.attack == -2:
             return "?"
         return self.attack

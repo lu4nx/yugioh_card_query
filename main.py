@@ -16,16 +16,16 @@ from PyQt5.QtWidgets import (
     QApplication,
     QMessageBox,
     QListWidgetItem,
-    QFileDialog
+    QFileDialog,
 )
 
-from core.limit_card import LimitCard
+from core.fl_card_list import ForbiddenLimitedCardList
 from core.card_database import CardDatabase
 
 from ui import Ui_MainWindow, Ui_settings, Ui_about, Ui_count
 
 
-__VERSION__ = "0.3"
+__VERSION__ = "0.4"
 __OFFICIAL_WEBSITE__ = "https://github.com/1u4nx/yugioh_card_query"
 
 
@@ -262,7 +262,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
             self.card_database = CardDatabase(CONF.get_card_database_path())
 
             try:
-                self.limit_card = LimitCard(CONF.get_limit_card_path())
+                self.limit_card = ForbiddenLimitedCardList(CONF.get_limit_card_path())
             except ValueError:
                 QMessageBox.information(self, "提示",
                                         "禁卡数据加载失败，请检查", QMessageBox.Ok)
@@ -277,7 +277,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
         if not search_keyword:
             return
-        self.search_keyword_edit.setText(search_keyword)
+        self.search_keyword_edit.lineEdit().setText(search_keyword)
         self.do_search()
 
     def show_picture_menu(self):
@@ -340,8 +340,12 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.search_result_widget.clear()
         self.search_result_widget.itemSelectionChanged.connect(self.show_card)
         search_type = self.search_type.currentText()
-        search_keyword = self.search_keyword_edit.text()
+        search_keyword = self.search_keyword_edit.lineEdit().text()
         self.history.add(search_keyword)
+
+        # 下拉列表保存搜索记录
+        if self.search_keyword_edit.findText(search_keyword) == -1:
+            self.search_keyword_edit.addItem(search_keyword)
 
         if search_keyword == "":
             QMessageBox.information(self, "提示", "请输入关键字", QMessageBox.Ok)
@@ -351,7 +355,6 @@ class MainUI(Ui_MainWindow, QMainWindow):
             search_result = self.card_database.match_query(search_keyword,
                                                            search_type)
         except DatabaseError as err:
-            print(err)
             QMessageBox.information(self, "警告", "数据库文件格式有误，请重新设置",
                                     QMessageBox.Ok)
             return

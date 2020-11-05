@@ -13,7 +13,7 @@
 import re
 
 
-class LimitCard(object):
+class ForbiddenLimitedCardList(object):
     """限制卡数据库"""
 
     def __init__(self, card_data_path):

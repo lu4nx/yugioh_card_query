@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -16,14 +16,11 @@ class Ui_MainWindow(object):
         MainWindow.resize(550, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.search_keyword_edit = QtWidgets.QLineEdit(self.centralwidget)
-        self.search_keyword_edit.setGeometry(QtCore.QRect(130, 10, 271, 30))
-        self.search_keyword_edit.setObjectName("search_keyword_edit")
         self.card_picture = QtWidgets.QLabel(self.centralwidget)
         self.card_picture.setGeometry(QtCore.QRect(300, 50, 221, 301))
         self.card_picture.setObjectName("card_picture")
         self.search_button = QtWidgets.QPushButton(self.centralwidget)
-        self.search_button.setGeometry(QtCore.QRect(410, 10, 85, 27))
+        self.search_button.setGeometry(QtCore.QRect(450, 10, 85, 27))
         self.search_button.setObjectName("search_button")
         self.search_type = QtWidgets.QComboBox(self.centralwidget)
         self.search_type.setGeometry(QtCore.QRect(10, 10, 71, 28))
@@ -41,9 +38,13 @@ class Ui_MainWindow(object):
         self.history_button.setGeometry(QtCore.QRect(90, 10, 31, 27))
         self.history_button.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         self.history_button.setObjectName("history_button")
+        self.search_keyword_edit = QtWidgets.QComboBox(self.centralwidget)
+        self.search_keyword_edit.setGeometry(QtCore.QRect(130, 10, 311, 31))
+        self.search_keyword_edit.setEditable(True)
+        self.search_keyword_edit.setObjectName("search_keyword_edit")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 550, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 550, 20))
         self.menubar.setObjectName("menubar")
         self.tools_menu = QtWidgets.QMenu(self.menubar)
         self.tools_menu.setObjectName("tools_menu")
@@ -77,7 +78,7 @@ class Ui_MainWindow(object):
         self.card_picture.setText(_translate("MainWindow", "TextLabel"))
         self.search_button.setText(_translate("MainWindow", "搜索"))
         self.search_type.setItemText(0, _translate("MainWindow", "卡名"))
-        self.search_type.setItemText(1, _translate("MainWindow", "卡码"))
+        self.search_type.setItemText(1, _translate("MainWindow", "卡密"))
         self.search_type.setItemText(2, _translate("MainWindow", "描述"))
         self.history_button.setText(_translate("MainWindow", "⇦"))
         self.tools_menu.setTitle(_translate("MainWindow", "工具"))
