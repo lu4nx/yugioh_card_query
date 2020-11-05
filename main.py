@@ -19,10 +19,11 @@ from PyQt5.QtWidgets import (
     QFileDialog,
 )
 
+from core.word_study import WordStudy
 from core.fl_card_list import ForbiddenLimitedCardList
 from core.card_database import CardDatabase
 
-from ui import Ui_MainWindow, Ui_settings, Ui_about, Ui_count
+from ui import Ui_MainWindow, Ui_settings, Ui_about, Ui_count, Ui_word_study
 
 
 __VERSION__ = "0.4"
@@ -162,6 +163,33 @@ class CountUI(Ui_count):
         self.dialog.exec()
 
 
+class WordStudyUI(Ui_word_study):
+    def __init__(self, parent=None):
+        self.dialog = QDialog()
+        self.setupUi(self.dialog)
+        self.word_study = WordStudy()
+        self.next_button.clicked.connect(self.next_word)
+        self.pre_button.clicked.connect(self.pre_word)
+
+    def show(self):
+        self.next_word()
+        self.dialog.show()
+        self.dialog.exec()
+
+    def pre_word(self):
+        word = self.word_study.get_pre_word()
+        if word:
+            self.japanese_text_edit.setPlainText(word[0])
+            self.chinese_text_edit.setPlainText(word[1])
+
+    def next_word(self):
+        word = self.word_study.get_next_word()
+        if word:
+            self.japanese_text_edit.setPlainText(word[0])
+            self.chinese_text_edit.setPlainText(word[1])
+
+
+
 class SettingUI(Ui_settings):
     def __init__(self, parent=None):
         self.dialog = QDialog()
@@ -231,6 +259,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.setFixedSize(self.width(), self.height())
         # 菜单选项响应注册
         self.setting_action.triggered.connect(lambda: SettingUI().show())
+        self.word_study_action.triggered.connect(lambda: WordStudyUI().show())
         self.card_count_action.triggered.connect(lambda: CountUI().show())
         self.about_action.triggered.connect(lambda: AboutUI().show())
         self.official_website_action.triggered.connect(

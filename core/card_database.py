@@ -280,7 +280,7 @@ class CardDatabase(object):
 """
 
     def match_query(self, search_keyword, field):
-        assert field in ("卡名", "卡码", "描述",)
+        assert field in ("卡名", "卡密", "描述",)
 
         if field == "卡名":
             cursor = self.conn.execute(
@@ -288,7 +288,7 @@ class CardDatabase(object):
                  "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
                  "where name like ? and texts.id=datas.id"),
                 (f"%{search_keyword}%",))
-        elif field == "卡码":
+        elif field == "卡密":
             cursor = self.conn.execute(
                 ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
                  "datas.atk, datas.def, datas.level, texts.desc from texts, datas "

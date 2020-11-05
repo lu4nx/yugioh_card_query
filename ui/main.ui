@@ -130,6 +130,7 @@
     </property>
     <addaction name="setting_action"/>
     <addaction name="card_count_action"/>
+    <addaction name="word_study_action"/>
    </widget>
    <widget class="QMenu" name="help_menu">
     <property name="title">
@@ -160,6 +161,11 @@
   <action name="card_count_action">
    <property name="text">
     <string>数据统计</string>
+   </property>
+  </action>
+  <action name="word_study_action">
+   <property name="text">
+    <string>词汇学习</string>
    </property>
   </action>
  </widget>
