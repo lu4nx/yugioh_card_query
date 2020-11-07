@@ -165,7 +165,7 @@ class CountUI(Ui_count):
 
 class WordStudyUI(Ui_word_study):
     def __init__(self, parent=None):
-        self.dialog = QDialog()
+        self.dialog = QDialog(parent=parent)
         self.setupUi(self.dialog)
         self.word_study = WordStudy()
         self.next_button.clicked.connect(self.next_word)
@@ -189,10 +189,9 @@ class WordStudyUI(Ui_word_study):
             self.chinese_text_edit.setPlainText(word[1])
 
 
-
 class SettingUI(Ui_settings):
     def __init__(self, parent=None):
-        self.dialog = QDialog()
+        self.dialog = QDialog(parent=parent)
         self.dialog.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         # 子窗口没关闭的情况下无法操作主窗口
         self.dialog.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -253,7 +252,7 @@ class AboutUI(Ui_about):
 
 class MainUI(Ui_MainWindow, QMainWindow):
     def __init__(self, parent=None):
-        super(MainUI, self).__init__(parent)
+        super(MainUI, self).__init__(parent=parent)
         self.setupUi(self)
         # 禁止改变窗口大小
         self.setFixedSize(self.width(), self.height())
@@ -453,7 +452,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
                                                            link_num=self.link_num_edit.text(),
                                                            pendulum_scales=self.pendulum_scales_edit.text(),
                                                            xyz_rank=self.xyz_rank_edit.text())
-        except DatabaseError as err:
+        except DatabaseError:
             QMessageBox.information(self, "警告", "数据库文件格式有误，请重新设置",
                                     QMessageBox.Ok)
             return

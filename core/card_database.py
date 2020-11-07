@@ -43,12 +43,19 @@ class CardBase(object):
                 "name": "怪兽",
                 "sub_type": {
                     0x4000000: "连接",
+                    0x2000000: "特殊召唤",
                     0x1000000: "灵摆",
                     0x800000: "超量",
+                    0x400000: "卡通",
                     0x2000: "同调",
+                    0x1000: "调整",
+                    0x4000: "衍生物",
+                    0x800: "二重",
+                    0x200: "灵魂",
                     0x80: "仪式",
                     0x40: "融合",
-                    0x20: "效果"
+                    0x20: "效果",
+                    0x10: "通常",
                 }
             },
             0x2: {
@@ -89,7 +96,7 @@ class CardBase(object):
             if (type_code & code) == code:
                 type_attributes.append(type_choose[code])
 
-        return " ".join(type_attributes)
+        return "/".join(type_attributes)
 
     def get_card_attribute(self, attribute_code):
         return {
@@ -236,8 +243,7 @@ class CardDatabase(object):
             "datas.type, datas.attribute, datas.level,"
             "datas.atk, datas.def, datas.race from texts, datas "
             "where texts.id=? "
-            "and texts.id = datas.id"),
-                                   (card_number,))
+            "and texts.id = datas.id"), (card_number,))
         item = cursor.fetchone()
         card = Card(
             number=item[0],
@@ -253,7 +259,7 @@ class CardDatabase(object):
         monster_info = self.monster_info_desc(card)
         return f"""{card.get_name()}（{card.get_number()}）
 
-类型：{card.get_type()}
+【{card.get_type()}】
 {monster_info}
 {card.get_desc()}
 """
@@ -434,7 +440,7 @@ class CardDatabase(object):
 
         if other_where:
             sql = f"{sql} and ({other_where})"
-            print(sql)
+            print(f"execute SQL: {sql}")
 
         cursor = self.conn.execute(sql, sql_args)
         for i in cursor:
