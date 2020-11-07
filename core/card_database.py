@@ -192,7 +192,11 @@ class Card(CardBase):
     def get_xyz_rank(self):
         """返回超量怪兽的阶级"""
         if self.is_xyz_monster():
-            return self.level
+            if self.is_pendulum_monster():
+                return self.level & 0xff
+            else:
+                return self.level
+
         return None
 
     def get_desc(self):

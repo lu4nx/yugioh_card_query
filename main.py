@@ -361,7 +361,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
         menu = QMenu(self)
         search_taobao = menu.addAction("淘宝搜卡")
-        search_ourocg = menu.addAction("OurOcg")
+        search_ourocg = menu.addAction("ourocg.cn 查卡")
         select = self.search_result_widget.selectedItems()
 
         if not select:
