@@ -285,6 +285,10 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.history = InputHistory()
         self.history_button.clicked.connect(self.back_history)
 
+        self.monster_checkBox.clicked.connect(lambda: self.active_opts("monster"))
+        self.spell_checkBox.clicked.connect(lambda: self.active_opts("spell"))
+        self.trap_checkBox.clicked.connect(lambda: self.active_opts("trap"))
+
         if not CONF.is_setting():
             self.please_setting()
         else:
@@ -295,6 +299,40 @@ class MainUI(Ui_MainWindow, QMainWindow):
             except ValueError:
                 QMessageBox.information(self, "提示",
                                         "禁卡数据加载失败，请检查", QMessageBox.Ok)
+
+    def active_opts(self, opt_type):
+        assert(opt_type in ("monster", "spell", "trap"))
+
+        group_targets = {"monster": self.monster_checkBox,
+                         "spell": self.spell_checkBox,
+                         "trap": self.trap_checkBox}
+
+        if opt_type == "monster":
+            opts = (self.monster_normal_checkBox, self.monster_effect_checkBox,
+                    self.monster_tuner_checkBox, self.monster_token_checkBox,
+                    self.monster_dual_checkBox, self.monster_toon_checkBox,
+                    self.monster_spirit_checkBox, self.monster_spsummon_checkBox,
+                    self.monster_fusion_checkBox, self.monster_xyz_checkBox,
+                    self.monster_synchro_checkBox, self.monster_pendulum_checkBox,
+                    self.monster_link_checkBox, self.monster_ritual_checkBox,
+                    self.attack_edit, self.defense_edit, self.level_edit,
+                    self.link_num_edit, self.pendulum_scales_edit,
+                    self.xyz_rank_edit)
+        elif opt_type == "spell":
+            opts = (self.spell_normal_checkBox, self.spell_continuous_checkBox,
+                    self.spell_quickplay_checkBox, self.spell_field_checkBox,
+                    self.spell_equip_checkBox, self.spell_ritual_checkBox)
+        elif opt_type == "trap":
+            opts = (self.trap_normal_checkBox, self.trap_continuous_checkBox,
+                    self.trap_counter_checkBox)
+
+        for opt in opts:
+            if group_targets[opt_type].isChecked():
+                opt.setEnabled(True)
+            else:
+                opt.setEnabled(False)
+
+        return
 
     def open_official_website(self):
         QDesktopServices.openUrl(QtCore.QUrl(__OFFICIAL_WEBSITE__))
@@ -311,8 +349,8 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
     def show_picture_menu(self):
         menu = QMenu(self)
-        copy_pic = menu.addAction("复制")
-        save_pic = menu.addAction("另存为...")
+        copy_pic = menu.addAction("复制卡图")
+        save_pic = menu.addAction("卡图另存为...")
         copy_pic.triggered.connect(self.copy_card_pic2clipboard)
         save_pic.triggered.connect(self.save_picture)
         menu.exec(QCursor.pos())
@@ -372,17 +410,22 @@ class MainUI(Ui_MainWindow, QMainWindow):
         search_keyword = self.search_keyword_edit.lineEdit().text()
         self.history.add(search_keyword)
 
-        # 下拉列表保存搜索记录
-        if self.search_keyword_edit.findText(search_keyword) == -1:
-            self.search_keyword_edit.addItem(search_keyword)
-
         if search_keyword == "":
             QMessageBox.information(self, "提示", "请输入关键字", QMessageBox.Ok)
             return
 
+        # 下拉列表保存搜索记录
+        if self.search_keyword_edit.findText(search_keyword) == -1:
+            self.search_keyword_edit.addItem(search_keyword)
+
         try:
             search_result = self.card_database.match_query(search_keyword,
-                                                           search_type)
+                                                           search_type,
+                                                           monster=self.monster_checkBox.isChecked(),
+                                                           spell=self.spell_checkBox.isChecked(),
+                                                           trap=self.trap_checkBox.isChecked(),
+                                                           monster_normal=self.monster_normal_checkBox.isChecked(),
+                                                           monster_effect=self.monster_effect_checkBox.isChecked(),)
         except DatabaseError as err:
             QMessageBox.information(self, "警告", "数据库文件格式有误，请重新设置",
                                     QMessageBox.Ok)
@@ -392,7 +435,9 @@ class MainUI(Ui_MainWindow, QMainWindow):
             QMessageBox.information(self, "提示", "查询结果为空", QMessageBox.Ok)
             return
 
+        result_total = 0
         for i in search_result:
+            result_total += 1
             limit_count = self.limit_card.get_limit_number(i.get_number())
 
             if limit_count is None:
@@ -409,6 +454,8 @@ class MainUI(Ui_MainWindow, QMainWindow):
                 item.setForeground(QColor("red"))
 
             self.search_result_widget.addItem(item)
+
+        self.total_label.setText(f"共检索到 {result_total} 条记录")
 
     def show_card(self):
         items = self.search_result_widget.selectedItems()
