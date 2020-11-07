@@ -282,6 +282,7 @@ class CardDatabase(object):
     def add_query_where_sql(self, **options):
         where_spell = []
         where_monster = []
+        where_monster_value = []
         where_trap = []
         where_monster_expr = "(type & 0x1) "
         where_spell_expr = "(type & 0x2) "
@@ -331,6 +332,27 @@ class CardDatabase(object):
         if options.get("monster_ritual"):
             where_monster.append("(type & 0x80)")
 
+        if options.get("attack"):
+            where_monster_value.append(f"atk={options.get('attack')}")
+
+        if options.get("defense"):
+            where_monster_value.append(f"def={options.get('defense')}")
+
+        if options.get("level"):
+            where_monster_value.append(f"level={options.get('level')}")
+
+        if options.get("link_num"):
+            where_monster_value.append(f"level={options.get('link_num')} and (type & 0x4000000)")
+
+        if options.get("pendulum_scales"):
+            # level 字段的高 2 位是保存的灵摆刻度，因此先将等级左移 24 位，再与 level 字段的高 2 位做位运算
+            # 灵摆最大刻度是 13
+            scale = hex(int(options.get("pendulum_scales")) << 24)
+            where_monster_value.append(f"((level & 0xf000000)={scale}) and (type & 0x1000000)")
+
+        if options.get("xyz_rank"):
+            where_monster_value.append(f"level={options.get('xyz_rank')} and (type & 0x800000)")
+
         # 魔法卡选项
         if options.get("spell_normal"):
             where_spell.append("type=0x2")
@@ -361,12 +383,16 @@ class CardDatabase(object):
             where_trap.append("(type & 0x100000)")
 
         monster_subexp = " or ".join(where_monster)
+        monster_value_subexp = " and ".join(where_monster_value)
         spell_subexp = " or ".join(where_spell)
         trap_subexp = " or ".join(where_trap)
 
         if options.get("monster"):
             if monster_subexp:
                 where_monster_expr = f"({where_monster_expr} and ({monster_subexp}))"
+
+            if monster_value_subexp:
+                where_monster_expr = f"({where_monster_expr} and ({monster_value_subexp}))"
 
             sql.append(where_monster_expr)
 

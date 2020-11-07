@@ -446,7 +446,13 @@ class MainUI(Ui_MainWindow, QMainWindow):
                                                            spell_ritual=self.spell_ritual_checkBox.isChecked(),
                                                            trap_normal=self.trap_normal_checkBox.isChecked(),
                                                            trap_continuous=self.trap_continuous_checkBox.isChecked(),
-                                                           trap_counter=self.trap_counter_checkBox.isChecked())
+                                                           trap_counter=self.trap_counter_checkBox.isChecked(),
+                                                           attack=self.attack_edit.text(),
+                                                           defense=self.defense_edit.text(),
+                                                           level=self.level_edit.text(),
+                                                           link_num=self.link_num_edit.text(),
+                                                           pendulum_scales=self.pendulum_scales_edit.text(),
+                                                           xyz_rank=self.xyz_rank_edit.text())
         except DatabaseError as err:
             QMessageBox.information(self, "警告", "数据库文件格式有误，请重新设置",
                                     QMessageBox.Ok)
