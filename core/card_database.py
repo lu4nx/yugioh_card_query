@@ -279,28 +279,138 @@ class CardDatabase(object):
 攻击：{card_obj.get_attack()}，防御：{card_obj.get_defense()}
 """
 
-    def match_query(self, search_keyword, field):
+    def add_query_where_sql(self, **options):
+        where_spell = []
+        where_monster = []
+        where_trap = []
+        where_monster_expr = "(type & 0x1) "
+        where_spell_expr = "(type & 0x2) "
+        where_trap_expr = "(type & 0x4) "
+        sql = []
+
+        # 怪兽选项
+        if options.get("monster_normal"):
+            where_monster.append("(type & 0x10)")
+
+        if options.get("monster_effect"):
+            where_monster.append("(type & 0x20)")
+
+        if options.get("monster_tuner"):
+            where_monster.append("(type & 0x1000)")
+
+        if options.get("monster_token"):
+            where_monster.append("(type & 0x4000)")
+
+        if options.get("monster_dual"):
+            where_monster.append("(type & 0x800)")
+
+        if options.get("monster_toon"):
+            where_monster.append("(type & 0x400000)")
+
+        if options.get("monster_spirit"):
+            where_monster.append("(type & 0x200)")
+
+        if options.get("monster_spsummon"):
+            where_monster.append("(type & 0x2000000)")
+
+        if options.get("monster_fusion"):
+            where_monster.append("(type & 0x40)")
+
+        if options.get("monster_xyz"):
+            where_monster.append("(type & 0x800000)")
+
+        if options.get("monster_synchro"):
+            where_monster.append("(type & 0x2000)")
+
+        if options.get("monster_pendulum"):
+            where_monster.append("(type & 0x1000000)")
+
+        if options.get("monster_link"):
+            where_monster.append("(type & 0x4000000)")
+
+        if options.get("monster_ritual"):
+            where_monster.append("(type & 0x80)")
+
+        # 魔法卡选项
+        if options.get("spell_normal"):
+            where_spell.append("type=0x2")
+
+        if options.get("spell_continuous"):
+            where_spell.append("(type & 0x20000)")
+
+        if options.get("spell_quickplay"):
+            where_spell.append("(type & 0x10000)")
+
+        if options.get("spell_field"):
+            where_spell.append("(type & 0x80000)")
+
+        if options.get("spell_equip"):
+            where_spell.append("(type & 0x40000)")
+
+        if options.get("spell_ritual"):
+            where_spell.append("(type & 0x80)")
+
+        # 陷阱卡选项
+        if options.get("trap_normal"):
+            where_trap.append("type=0x4")
+
+        if options.get("trap_continuous"):
+            where_trap.append("(type & 0x20000)")
+
+        if options.get("trap_counter"):
+            where_trap.append("(type & 0x100000)")
+
+        monster_subexp = " or ".join(where_monster)
+        spell_subexp = " or ".join(where_spell)
+        trap_subexp = " or ".join(where_trap)
+
+        if options.get("monster"):
+            if monster_subexp:
+                where_monster_expr = f"({where_monster_expr} and ({monster_subexp}))"
+
+            sql.append(where_monster_expr)
+
+        if options.get("spell"):
+            if spell_subexp:
+                where_spell_expr = f"({where_spell_expr} and ({spell_subexp}))"
+
+            sql.append(where_spell_expr)
+
+        if options.get("trap"):
+            if trap_subexp:
+                where_trap_expr = f"({where_trap_expr} and ({trap_subexp}))"
+
+            sql.append(where_trap_expr)
+
+        return " or ".join(sql)
+
+    def match_query(self, search_keyword, field, **options):
         assert field in ("卡名", "卡密", "描述",)
 
-        if field == "卡名":
-            cursor = self.conn.execute(
-                ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
-                 "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
-                 "where name like ? and texts.id=datas.id"),
-                (f"%{search_keyword}%",))
-        elif field == "卡密":
-            cursor = self.conn.execute(
-                ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
-                 "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
-                 "where texts.id=? and texts.id=datas.id"),
-                (search_keyword,))
-        elif field == "描述":
-            cursor = self.conn.execute(
-                ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
-                 "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
-                 "where texts.desc like ? and texts.id=datas.id"),
-                (f"%{search_keyword}%",))
+        other_where = self.add_query_where_sql(**options)
 
+        if field == "卡名":
+            sql = ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
+                   "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
+                   "where texts.id=datas.id and name like ?")
+            sql_args = (f"%{search_keyword}%",)
+
+        elif field == "卡密":
+            sql = ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
+                   "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
+                   "where texts.id=datas.id and texts.id=?")
+            sql_args = (search_keyword,)
+        elif field == "描述":
+            sql = ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
+                   "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
+                   "where texts.id=datas.id and texts.desc like ?")
+            sql_args = (f"%{search_keyword}%",)
+
+        if other_where:
+            sql = f"{sql} and ({other_where})"
+            print(sql)
+
+        cursor = self.conn.execute(sql, sql_args)
         for i in cursor:
             yield Card(number=i[0],
                        name=i[1],
