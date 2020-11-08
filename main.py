@@ -43,6 +43,10 @@ class UserSetting(object):
         if not os.path.exists(self.user_config_file):
             return
 
+        # 不允许连接到其他文件，防止任意文件读取
+        if os.path.islink(self.user_config_file):
+            return
+
         with open(self.user_config_file, "r") as f:
             config_content = json.load(f)
             self.card_pictures_path = config_content["card_pictures_path"]
@@ -388,7 +392,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         app_base_dir = os.path.dirname(os.path.realpath(__file__))
         defalut_pic = f"{app_base_dir}/images/card_default_picture.png"
 
-        if (path is None) or (not os.path.exists(path)):
+        if (path is None) or (not os.path.exists(path)) or (os.path.islink(path)):
             card_pic_file = QPixmap(defalut_pic)
         else:
             card_pic_file = QPixmap(path)
@@ -416,6 +420,17 @@ class MainUI(Ui_MainWindow, QMainWindow):
         # 下拉列表保存搜索记录
         if self.search_keyword_edit.findText(search_keyword) == -1:
             self.search_keyword_edit.addItem(search_keyword)
+
+        try:
+            attack = self.attack_edit.text() and int(self.attack_edit.text())
+            defense = self.defense_edit.text() and int(self.defense_edit.text())
+            level = self.level_edit.text() and int(self.level_edit.text())
+            link_num = self.link_num_edit.text() and int(self.link_num_edit.text())
+            pendulum_scales = self.pendulum_scales_edit.text() and int(self.pendulum_scales_edit.text())
+            xyz_rank = self.xyz_rank_edit.text() and int(self.xyz_rank_edit.text())
+        except ValueError:
+            QMessageBox.information(self, "警告", "ATT、DEF、等级、LINK 值、刻度、阶级必须是数字", QMessageBox.Ok)
+            return
 
         try:
             search_result = self.card_database.match_query(search_keyword,
@@ -446,12 +461,12 @@ class MainUI(Ui_MainWindow, QMainWindow):
                                                            trap_normal=self.trap_normal_checkBox.isChecked(),
                                                            trap_continuous=self.trap_continuous_checkBox.isChecked(),
                                                            trap_counter=self.trap_counter_checkBox.isChecked(),
-                                                           attack=self.attack_edit.text(),
-                                                           defense=self.defense_edit.text(),
-                                                           level=self.level_edit.text(),
-                                                           link_num=self.link_num_edit.text(),
-                                                           pendulum_scales=self.pendulum_scales_edit.text(),
-                                                           xyz_rank=self.xyz_rank_edit.text())
+                                                           attack=attack,
+                                                           defense=defense,
+                                                           level=level,
+                                                           link_num=link_num,
+                                                           pendulum_scales=pendulum_scales,
+                                                           xyz_rank=xyz_rank)
         except DatabaseError:
             QMessageBox.information(self, "警告", "数据库文件格式有误，请重新设置",
                                     QMessageBox.Ok)

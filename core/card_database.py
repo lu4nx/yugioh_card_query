@@ -300,59 +300,24 @@ class CardDatabase(object):
         sql = []
 
         # 怪兽选项
-        if options.get("monster_normal"):
-            where_monster.append("(type & 0x10)")
-
-        if options.get("monster_effect"):
-            where_monster.append("(type & 0x20)")
-
-        if options.get("monster_tuner"):
-            where_monster.append("(type & 0x1000)")
-
-        if options.get("monster_token"):
-            where_monster.append("(type & 0x4000)")
-
-        if options.get("monster_dual"):
-            where_monster.append("(type & 0x800)")
-
-        if options.get("monster_toon"):
-            where_monster.append("(type & 0x400000)")
-
-        if options.get("monster_spirit"):
-            where_monster.append("(type & 0x200)")
-
-        if options.get("monster_spsummon"):
-            where_monster.append("(type & 0x2000000)")
-
-        if options.get("monster_fusion"):
-            where_monster.append("(type & 0x40)")
-
-        if options.get("monster_xyz"):
-            where_monster.append("(type & 0x800000)")
-
-        if options.get("monster_synchro"):
-            where_monster.append("(type & 0x2000)")
-
-        if options.get("monster_pendulum"):
-            where_monster.append("(type & 0x1000000)")
-
-        if options.get("monster_link"):
-            where_monster.append("(type & 0x4000000)")
-
-        if options.get("monster_ritual"):
-            where_monster.append("(type & 0x80)")
-
-        if options.get("attack"):
-            where_monster_value.append(f"atk={options.get('attack')}")
-
-        if options.get("defense"):
-            where_monster_value.append(f"def={options.get('defense')}")
-
-        if options.get("level"):
-            where_monster_value.append(f"level={options.get('level')}")
-
-        if options.get("link_num"):
-            where_monster_value.append(f"level={options.get('link_num')} and (type & 0x4000000)")
+        options.get("monster_normal") and where_monster.append("(type & 0x10)")
+        options.get("monster_effect") and where_monster.append("(type & 0x20)")
+        options.get("monster_tuner") and where_monster.append("(type & 0x1000)")
+        options.get("monster_token") and where_monster.append("(type & 0x4000)")
+        options.get("monster_dual") and where_monster.append("(type & 0x800)")
+        options.get("monster_toon") and where_monster.append("(type & 0x400000)")
+        options.get("monster_spirit") and where_monster.append("(type & 0x200)")
+        options.get("monster_spsummon") and where_monster.append("(type & 0x2000000)")
+        options.get("monster_fusion") and where_monster.append("(type & 0x40)")
+        options.get("monster_xyz") and where_monster.append("(type & 0x800000)")
+        options.get("monster_synchro") and where_monster.append("(type & 0x2000)")
+        options.get("monster_pendulum") and where_monster.append("(type & 0x1000000)")
+        options.get("monster_link") and where_monster.append("(type & 0x4000000)")
+        options.get("monster_ritual") and where_monster.append("(type & 0x80)")
+        options.get("attack") and where_monster_value.append(f"atk={int(options.get('attack'))}")
+        options.get("defense") and where_monster_value.append(f"def={int(options.get('defense'))}")
+        options.get("level") and where_monster_value.append(f"level={int(options.get('level'))}")
+        options.get("link_num") and where_monster_value.append(f"level={int(options.get('link_num'))} and (type & 0x4000000)")
 
         if options.get("pendulum_scales"):
             # level 字段的高 2 位是保存的灵摆刻度，因此先将等级左移 24 位，再与 level 字段的高 2 位做位运算
@@ -360,37 +325,20 @@ class CardDatabase(object):
             scale = hex(int(options.get("pendulum_scales")) << 24)
             where_monster_value.append(f"((level & 0xf000000)={scale}) and (type & 0x1000000)")
 
-        if options.get("xyz_rank"):
-            where_monster_value.append(f"level={options.get('xyz_rank')} and (type & 0x800000)")
+        options.get("xyz_rank") and where_monster_value.append(f"level={int(options.get('xyz_rank'))} and (type & 0x800000)")
 
         # 魔法卡选项
-        if options.get("spell_normal"):
-            where_spell.append("type=0x2")
-
-        if options.get("spell_continuous"):
-            where_spell.append("(type & 0x20000)")
-
-        if options.get("spell_quickplay"):
-            where_spell.append("(type & 0x10000)")
-
-        if options.get("spell_field"):
-            where_spell.append("(type & 0x80000)")
-
-        if options.get("spell_equip"):
-            where_spell.append("(type & 0x40000)")
-
-        if options.get("spell_ritual"):
-            where_spell.append("(type & 0x80)")
+        options.get("spell_normal") and where_spell.append("type=0x2")
+        options.get("spell_continuous") and where_spell.append("(type & 0x20000)")
+        options.get("spell_quickplay") and where_spell.append("(type & 0x10000)")
+        options.get("spell_field") and where_spell.append("(type & 0x80000)")
+        options.get("spell_equip") and where_spell.append("(type & 0x40000)")
+        options.get("spell_ritual") and where_spell.append("(type & 0x80)")
 
         # 陷阱卡选项
-        if options.get("trap_normal"):
-            where_trap.append("type=0x4")
-
-        if options.get("trap_continuous"):
-            where_trap.append("(type & 0x20000)")
-
-        if options.get("trap_counter"):
-            where_trap.append("(type & 0x100000)")
+        options.get("trap_normal") and where_trap.append("type=0x4")
+        options.get("trap_continuous") and where_trap.append("(type & 0x20000)")
+        options.get("trap_counter") and where_trap.append("(type & 0x100000)")
 
         monster_subexp = " or ".join(where_monster)
         monster_value_subexp = " and ".join(where_monster_value)
@@ -444,10 +392,9 @@ class CardDatabase(object):
 
         if other_where:
             sql = f"{sql} and ({other_where})"
-            print(f"execute SQL: {sql}")
 
-        cursor = self.conn.execute(sql, sql_args)
-        for i in cursor:
+        print(f"execute SQL: {sql}")
+        for i in self.conn.execute(sql, sql_args):
             yield Card(number=i[0],
                        name=i[1],
                        card_type=i[2],
