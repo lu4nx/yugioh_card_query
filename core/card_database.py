@@ -241,25 +241,26 @@ class CardDatabase(object):
         return [(CardBase().get_card_type(i[0]), i[1],)
                 for i in list(cursor)]
 
-    def get_card_info(self, card_number):
+    def query_password(self, card_password):
         cursor = self.conn.execute((
             "select texts.id, texts.name, texts.desc,"
             "datas.type, datas.attribute, datas.level,"
             "datas.atk, datas.def, datas.race from texts, datas "
             "where texts.id=? "
-            "and texts.id = datas.id"), (card_number,))
+            "and texts.id = datas.id"), (card_password,))
         item = cursor.fetchone()
-        card = Card(
-            number=item[0],
-            name=item[1],
-            desc=item[2],
-            card_type=item[3],
-            attribute=item[4],
-            level=item[5],
-            attack=item[6],
-            defense=item[7],
-            race=item[8])
+        return Card(number=item[0],
+                    name=item[1],
+                    desc=item[2],
+                    card_type=item[3],
+                    attribute=item[4],
+                    level=item[5],
+                    attack=item[6],
+                    defense=item[7],
+                    race=item[8])
 
+    def get_card_info(self, card_number):
+        card = self.query_password(card_number)
         monster_info = self.monster_info_desc(card)
         return f"""{card.get_name()}（{card.get_number()}）
 
