@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>788</width>
-    <height>600</height>
+    <height>707</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,7 +71,7 @@
       <x>520</x>
       <y>360</y>
       <width>256</width>
-      <height>192</height>
+      <height>301</height>
      </rect>
     </property>
    </widget>
@@ -81,7 +81,7 @@
       <x>10</x>
       <y>50</y>
       <width>256</width>
-      <height>501</height>
+      <height>611</height>
      </rect>
     </property>
    </widget>
@@ -785,6 +785,13 @@
     <addaction name="about_action"/>
     <addaction name="official_website_action"/>
    </widget>
+   <widget class="QMenu" name="file_menu">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="load_ydk_action"/>
+   </widget>
+   <addaction name="file_menu"/>
    <addaction name="tools_menu"/>
    <addaction name="help_menu"/>
   </widget>
@@ -812,6 +819,11 @@
   <action name="word_study_action">
    <property name="text">
     <string>词汇学习</string>
+   </property>
+  </action>
+  <action name="load_ydk_action">
+   <property name="text">
+    <string>加载.ydk</string>
    </property>
   </action>
  </widget>

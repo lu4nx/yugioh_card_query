@@ -8,7 +8,7 @@ import json
 from sqlite3 import DatabaseError
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QCursor, QPixmap, QDesktopServices, QColor
+from PyQt5.QtGui import QCursor, QPixmap, QDesktopServices, QColor, QFont
 from PyQt5.QtWidgets import (
     QMenu,
     QDialog,
@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,
 )
 
+from core.ydk import YDK
 from core.word_study import WordStudy
 from core.fl_card_list import ForbiddenLimitedCardList
 from core.card_database import CardDatabase
@@ -269,9 +270,11 @@ class MainUI(Ui_MainWindow, QMainWindow):
             self.open_official_website
         )
         self.search_button.clicked.connect(self.do_search)
+        self.load_ydk_action.triggered.connect(self.load_ydk)
         # 响应回车事件
         self.search_button.setShortcut(QtCore.Qt.Key_Return)
         self.set_card_picture_show()
+        self.search_result_widget.itemSelectionChanged.connect(self.show_card)
         # 注册卡图的右键菜单
         self.card_picture.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.card_picture.customContextMenuRequested.connect(
@@ -339,6 +342,37 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
     def open_official_website(self):
         QDesktopServices.openUrl(QtCore.QUrl(__OFFICIAL_WEBSITE__))
+
+    def load_ydk(self):
+        ydk_file, _ = QFileDialog.getOpenFileName(self,
+                                                     "选择文件",
+                                                     "/",
+                                                     "(*.ydk);;All Files (*)")
+        ydk_obj = YDK(ydk_file)
+        self.search_result_widget.clear()
+
+        for deck_type, deck in ((f"\t主卡组（{len(ydk_obj.main_deck)}）", ydk_obj.main_deck),
+                                (f"\t额外卡组（{len(ydk_obj.extra_deck)}）", ydk_obj.extra_deck),
+                                (f"\t副卡组（{len(ydk_obj.side_deck)}）", ydk_obj.side_deck)):
+            font = QFont()
+            font.setPointSize(12)
+            item4deck = QListWidgetItem()
+            item4deck.setText(deck_type)
+            item4deck.setForeground(QColor("blue"))
+            item4deck.setFont(font)
+            self.search_result_widget.addItem(item4deck)
+            # self.search_result_widget.addItem(deck_type)
+
+            for card_password in deck:
+                card = self.card_database.query_password(card_password)
+
+                if card is None:
+                    self.search_result_widget.addItem(f"???{card_password}")
+                    continue
+
+                limit_count = self.limit_card.get_limit_number(card.get_number())
+                item = self.format_list_item(card, limit_count)
+                self.search_result_widget.addItem(item)
 
     def back_history(self):
         # 先要弹出一次当前的搜索关键字，才能取到上一次的搜索关键字，因此调用两次 back 方法
@@ -408,7 +442,6 @@ class MainUI(Ui_MainWindow, QMainWindow):
             return
 
         self.search_result_widget.clear()
-        self.search_result_widget.itemSelectionChanged.connect(self.show_card)
         search_type = self.search_type.currentText()
         search_keyword = self.search_keyword_edit.lineEdit().text()
         self.history.add(search_keyword)
@@ -480,28 +513,37 @@ class MainUI(Ui_MainWindow, QMainWindow):
         for i in search_result:
             result_total += 1
             limit_count = self.limit_card.get_limit_number(i.get_number())
-
-            if limit_count is None:
-                item = CardItem(f"[{i.get_short_type()}]{i.get_name()}",
-                                card_number=(i.get_number()))
-            elif limit_count == 0:
-                item = CardItem(f"[{i.get_short_type()}][禁]{i.get_name()}",
-                                card_number=(i.get_number()))
-                item.setForeground(QColor("red"))
-            else:
-                item = CardItem(
-                    f"[{i.get_short_type()}][限{limit_count}]{i.get_name()}",
-                    card_number=(i.get_number()))
-                item.setForeground(QColor("red"))
-
+            item = self.format_list_item(i, limit_count)
             self.search_result_widget.addItem(item)
 
         self.total_label.setText(f"共检索到 {result_total} 条记录")
+
+    def format_list_item(self, card, limit_count):
+        if limit_count is None:
+            item = CardItem(f"[{card.get_short_type()}]{card.get_name()}",
+                            card_number=(card.get_number()))
+        elif limit_count == 0:
+            item = CardItem(f"[{card.get_short_type()}][禁]{card.get_name()}",
+                            card_number=(card.get_number()))
+            item.setForeground(QColor("red"))
+        else:
+            item = CardItem(
+                f"[{card.get_short_type()}][限{limit_count}]{card.get_name()}",
+                card_number=(card.get_number()))
+            item.setForeground(QColor("red"))
+
+        return item
 
     def show_card(self):
         items = self.search_result_widget.selectedItems()
         # 列表没支持多选，因此这里循环实际暂时无意义，和取第一个元素是一样的
         for item in items:
+            if item is None:
+                continue
+
+            if not isinstance(item, CardItem):
+                continue
+
             card_number = item.get_number()
             picture_path = f"{CONF.get_card_pictures_path()}/{card_number}.jpg"
             self.set_card_picture_show(picture_path)

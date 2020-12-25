@@ -249,6 +249,10 @@ class CardDatabase(object):
             "where texts.id=? "
             "and texts.id = datas.id"), (card_password,))
         item = cursor.fetchone()
+
+        if item is None:
+            return
+
         return Card(number=item[0],
                     name=item[1],
                     desc=item[2],
