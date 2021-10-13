@@ -5,7 +5,7 @@ import re
 import os
 import sys
 import json
-from sqlite3 import DatabaseError
+from sqlite3 import DatabaseError, OperationalError
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor, QPixmap, QDesktopServices, QColor, QFont
@@ -27,7 +27,7 @@ from core.card_database import CardDatabase
 from ui import Ui_MainWindow, Ui_settings, Ui_about, Ui_count, Ui_word_study
 
 
-__VERSION__ = "0.4"
+__VERSION__ = "0.5"
 __OFFICIAL_WEBSITE__ = "https://github.com/1u4nx/yugioh_card_query"
 
 
@@ -297,14 +297,21 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
         if not CONF.is_setting():
             self.please_setting()
-        else:
-            self.card_database = CardDatabase(CONF.get_card_database_path())
+            return
 
-            try:
-                self.limit_card = ForbiddenLimitedCardList(CONF.get_limit_card_path())
-            except ValueError:
-                QMessageBox.information(self, "提示",
-                                        "禁卡数据加载失败，请检查", QMessageBox.Ok)
+        try:
+            self.card_database = CardDatabase(CONF.get_card_database_path())
+        except OperationalError:
+            QMessageBox.information(self, "提示",
+                                    "数据库加载失败，请检查配置的路径是否失效", QMessageBox.Ok)
+            return
+
+        try:
+            self.limit_card = ForbiddenLimitedCardList(CONF.get_limit_card_path())
+        except ValueError:
+            QMessageBox.information(self, "提示",
+                                    "禁卡数据加载失败，请检查", QMessageBox.Ok)
+            return
 
     def active_opts(self, opt_type):
         assert(opt_type in ("monster", "spell", "trap"))
@@ -348,6 +355,9 @@ class MainUI(Ui_MainWindow, QMainWindow):
                                                      "选择文件",
                                                      "/",
                                                      "(*.ydk);;All Files (*)")
+        if not ydk_file:
+            return
+
         ydk_obj = YDK(ydk_file)
         self.search_result_widget.clear()
 
