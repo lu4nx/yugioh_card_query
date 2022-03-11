@@ -456,9 +456,9 @@ class MainUI(Ui_MainWindow, QMainWindow):
         search_keyword = self.search_keyword_edit.lineEdit().text()
         self.history.add(search_keyword)
 
-        if search_keyword == "":
-            QMessageBox.information(self, "提示", "请输入关键字", QMessageBox.Ok)
-            return
+        # if search_keyword == "":
+        #     QMessageBox.information(self, "提示", "请输入关键字", QMessageBox.Ok)
+        #     return
 
         # 下拉列表保存搜索记录
         if self.search_keyword_edit.findText(search_keyword) == -1:
