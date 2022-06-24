@@ -374,7 +374,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
             # self.search_result_widget.addItem(deck_type)
 
             for card_password in deck:
-                card = self.card_database.query_password(card_password)
+                card = self.card_database.query_for_password(card_password)
 
                 if card is None:
                     self.search_result_widget.addItem(f"???{card_password}")
@@ -456,10 +456,6 @@ class MainUI(Ui_MainWindow, QMainWindow):
         search_keyword = self.search_keyword_edit.lineEdit().text()
         self.history.add(search_keyword)
 
-        # if search_keyword == "":
-        #     QMessageBox.information(self, "提示", "请输入关键字", QMessageBox.Ok)
-        #     return
-
         # 下拉列表保存搜索记录
         if self.search_keyword_edit.findText(search_keyword) == -1:
             self.search_keyword_edit.addItem(search_keyword)
@@ -476,40 +472,41 @@ class MainUI(Ui_MainWindow, QMainWindow):
             return
 
         try:
-            search_result = self.card_database.match_query(search_keyword,
-                                                           search_type,
-                                                           monster=self.monster_checkBox.isChecked(),
-                                                           spell=self.spell_checkBox.isChecked(),
-                                                           trap=self.trap_checkBox.isChecked(),
-                                                           monster_normal=self.monster_normal_checkBox.isChecked(),
-                                                           monster_effect=self.monster_effect_checkBox.isChecked(),
-                                                           monster_tuner=self.monster_tuner_checkBox.isChecked(),
-                                                           monster_token=self.monster_token_checkBox.isChecked(),
-                                                           monster_dual=self.monster_dual_checkBox.isChecked(),
-                                                           monster_toon=self.monster_toon_checkBox.isChecked(),
-                                                           monster_spirit=self.monster_spirit_checkBox.isChecked(),
-                                                           monster_spsummon=self.monster_spsummon_checkBox.isChecked(),
-                                                           monster_fusion=self.monster_fusion_checkBox.isChecked(),
-                                                           monster_xyz=self.monster_xyz_checkBox.isChecked(),
-                                                           monster_synchro=self.monster_synchro_checkBox.isChecked(),
-                                                           monster_pendulum=self.monster_pendulum_checkBox.isChecked(),
-                                                           monster_link=self.monster_link_checkBox.isChecked(),
-                                                           monster_ritual=self.monster_ritual_checkBox.isChecked(),
-                                                           spell_normal=self.spell_normal_checkBox.isChecked(),
-                                                           spell_continuous=self.spell_continuous_checkBox.isChecked(),
-                                                           spell_quickplay=self.spell_quickplay_checkBox.isChecked(),
-                                                           spell_field=self.spell_field_checkBox.isChecked(),
-                                                           spell_equip=self.spell_equip_checkBox.isChecked(),
-                                                           spell_ritual=self.spell_ritual_checkBox.isChecked(),
-                                                           trap_normal=self.trap_normal_checkBox.isChecked(),
-                                                           trap_continuous=self.trap_continuous_checkBox.isChecked(),
-                                                           trap_counter=self.trap_counter_checkBox.isChecked(),
-                                                           attack=attack,
-                                                           defense=defense,
-                                                           level=level,
-                                                           link_num=link_num,
-                                                           pendulum_scales=pendulum_scales,
-                                                           xyz_rank=xyz_rank)
+            search_result = self.card_database.search(
+                search_keyword,
+                search_type,
+                monster=self.monster_checkBox.isChecked(),
+                spell=self.spell_checkBox.isChecked(),
+                trap=self.trap_checkBox.isChecked(),
+                monster_normal=self.monster_normal_checkBox.isChecked(),
+                monster_effect=self.monster_effect_checkBox.isChecked(),
+                monster_tuner=self.monster_tuner_checkBox.isChecked(),
+                monster_token=self.monster_token_checkBox.isChecked(),
+                monster_dual=self.monster_dual_checkBox.isChecked(),
+                monster_toon=self.monster_toon_checkBox.isChecked(),
+                monster_spirit=self.monster_spirit_checkBox.isChecked(),
+                monster_spsummon=self.monster_spsummon_checkBox.isChecked(),
+                monster_fusion=self.monster_fusion_checkBox.isChecked(),
+                monster_xyz=self.monster_xyz_checkBox.isChecked(),
+                monster_synchro=self.monster_synchro_checkBox.isChecked(),
+                monster_pendulum=self.monster_pendulum_checkBox.isChecked(),
+                monster_link=self.monster_link_checkBox.isChecked(),
+                monster_ritual=self.monster_ritual_checkBox.isChecked(),
+                spell_normal=self.spell_normal_checkBox.isChecked(),
+                spell_continuous=self.spell_continuous_checkBox.isChecked(),
+                spell_quickplay=self.spell_quickplay_checkBox.isChecked(),
+                spell_field=self.spell_field_checkBox.isChecked(),
+                spell_equip=self.spell_equip_checkBox.isChecked(),
+                spell_ritual=self.spell_ritual_checkBox.isChecked(),
+                trap_normal=self.trap_normal_checkBox.isChecked(),
+                trap_continuous=self.trap_continuous_checkBox.isChecked(),
+                trap_counter=self.trap_counter_checkBox.isChecked(),
+                attack=attack,
+                defense=defense,
+                level=level,
+                link_num=link_num,
+                pendulum_scales=pendulum_scales,
+                xyz_rank=xyz_rank)
         except DatabaseError:
             QMessageBox.information(self, "警告", "数据库文件格式有误，请重新设置",
                                     QMessageBox.Ok)

@@ -1,3 +1,5 @@
+# author: lu4nx <www.shellcodes.org>
+
 class WordStudy(object):
     def __init__(self):
         self.words = [

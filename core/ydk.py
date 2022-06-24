@@ -1,3 +1,6 @@
+# author: lu4nx <www.shellcodes.org>
+
+
 class YDK(object):
     """.ydk 文件解析"""
 

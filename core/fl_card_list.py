@@ -1,5 +1,7 @@
+# author: lu4nx <www.shellcodes.org>
+
 """
-加载限制卡数据
+加载禁卡表数据
 
 官方规定的限制卡有三种：
 
