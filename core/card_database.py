@@ -374,22 +374,16 @@ class CardDatabase(object):
         return " or ".join(sql)
 
     def search(self, search_keyword, field, **options):
-        assert field in ("卡名", "卡密", "描述",)
+        assert field in ("卡名/卡密", "描述文本",)
 
         wheres = self.add_query_where_sql(**options)
 
-        if field == "卡名":
+        if field == "卡名/卡密":
             sql = ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
                    "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
-                   "where texts.id=datas.id and name like ?")
-            query_value = (f"%{search_keyword}%",)
-
-        elif field == "卡密":
-            sql = ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
-                   "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
-                   "where texts.id=datas.id and texts.id=?")
-            query_value = (search_keyword,)
-        elif field == "描述":
+                   "where texts.id=datas.id and (name like ? or texts.id=?)")
+            query_value = (f"%{search_keyword}%", search_keyword)
+        elif field == "描述文本":
             sql = ("select texts.id, texts.name, datas.type, datas.race, datas.attribute,"
                    "datas.atk, datas.def, datas.level, texts.desc from texts, datas "
                    "where texts.id=datas.id and texts.desc like ?")
