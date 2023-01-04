@@ -28,13 +28,7 @@ class YDK(object):
 
                 if stat == "main":
                     self.main_deck.append(line.strip())
-                    continue
                 elif stat == "extra":
                     self.extra_deck.append(line.strip())
-                    continue
                 elif stat == "side":
                     self.side_deck.append(line.strip())
-                    continue
-
-                continue
-
