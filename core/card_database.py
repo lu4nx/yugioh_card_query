@@ -81,9 +81,7 @@ def get_card_type(type_code):
     type_choose = None
 
     for code in card_type_codes_map:
-        main_type = type_code & code
-
-        if main_type:
+        if main_type := (type_code & code):
             name = card_type_codes_map.get(main_type)["name"]
             type_attributes.append(name)
             type_choose = card_type_codes_map[code]["sub_type"]
@@ -249,9 +247,8 @@ class CardDatabase(object):
             "datas.atk, datas.def, datas.race from texts, datas "
             "where texts.id=? "
             "and texts.id = datas.id"), (card_password,))
-        item = cursor.fetchone()
 
-        if item is None:
+        if (item := cursor.fetchone()) is None:
             return
 
         return Card(number=item[0],

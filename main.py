@@ -149,11 +149,9 @@ class CountUI(Ui_count):
         return types_count
 
     def pretty_types_count(self):
-        count_result = self.count_card()
         card_total = 0
-
         ret = ""
-        for type_name in count_result:
+        for type_name in (count_result := self.count_card()):
             ret += f"{type_name}：\n"
             for sub_type_name in count_result[type_name]:
                 sub_type_total = count_result[type_name][sub_type_name]
@@ -182,14 +180,12 @@ class WordStudyUI(Ui_word_study):
         self.dialog.exec()
 
     def pre_word(self):
-        word = self.word_study.get_pre_word()
-        if word:
+        if word := self.word_study.get_pre_word():
             self.japanese_text_edit.setPlainText(word[0])
             self.chinese_text_edit.setPlainText(word[1])
 
     def next_word(self):
-        word = self.word_study.get_next_word()
-        if word:
+        if word := self.word_study.get_next_word():
             self.japanese_text_edit.setPlainText(word[0])
             self.chinese_text_edit.setPlainText(word[1])
 
@@ -287,7 +283,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.search_result_widget.customContextMenuRequested.connect(
             self.show_search_result_menu
         )
-        # 搜索历史
+
         self.history = InputHistory()
         self.history_button.clicked.connect(self.back_history)
 
@@ -296,7 +292,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         self.trap_checkBox.clicked.connect(lambda: self.active_opts("trap"))
 
         if not CONF.is_setting():
-            self.please_setting()
+            self.alert_please_setting()
             return
 
         try:
@@ -371,12 +367,9 @@ class MainUI(Ui_MainWindow, QMainWindow):
             item4deck.setForeground(QColor("blue"))
             item4deck.setFont(font)
             self.search_result_widget.addItem(item4deck)
-            # self.search_result_widget.addItem(deck_type)
 
             for card_password in deck:
-                card = self.card_database.query_for_password(card_password)
-
-                if card is None:
+                if (card := self.card_database.query_for_password(card_password)) is None:
                     self.search_result_widget.addItem(f"???{card_password}")
                     continue
 
@@ -387,9 +380,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
     def back_history(self):
         # 先要弹出一次当前的搜索关键字，才能取到上一次的搜索关键字，因此调用两次 back 方法
         self.history.back()
-        search_keyword = self.history.back()
-
-        if not search_keyword:
+        if not (search_keyword := self.history.back()):
             return
         self.search_keyword_edit.lineEdit().setText(search_keyword)
         self.do_search()
@@ -410,9 +401,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         menu = QMenu(self)
         search_taobao = menu.addAction("淘宝搜卡")
         search_ourocg = menu.addAction("ourocg.cn 查卡")
-        select = self.search_result_widget.selectedItems()
-
-        if not select:
+        if not (select := self.search_result_widget.selectedItems()):
             return
 
         item = select[0]
@@ -429,7 +418,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
         clipboard = QApplication.clipboard()
         clipboard.setPixmap(self.card_picture.pixmap())
 
-    def please_setting(self):
+    def alert_please_setting(self):
         QMessageBox.information(self, "提示", "请先配置数据：工具 > 设置", QMessageBox.Ok)
 
     def set_card_picture_show(self, path=None):
@@ -448,7 +437,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
     def do_search(self):
         if not CONF.is_setting():
-            self.please_setting()
+            self.alert_please_setting()
             return
 
         self.search_result_widget.clear()
@@ -542,9 +531,8 @@ class MainUI(Ui_MainWindow, QMainWindow):
         return item
 
     def show_card(self):
-        items = self.search_result_widget.selectedItems()
         # 列表没支持多选，因此这里循环实际暂时无意义，和取第一个元素是一样的
-        for item in items:
+        for item in self.search_result_widget.selectedItems():
             if item is None:
                 continue
 
