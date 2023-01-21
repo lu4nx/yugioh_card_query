@@ -150,12 +150,15 @@ class Card(object):
 
     def get_attribute(self):
         card_attribute = get_card_attribute(self.attribute)
-        assert card_attribute is not None
+        if card_attribute is None:
+            return "?"
         return card_attribute
 
     def get_race(self):
         if self.is_monster():
-            return get_monster_race(self.race)
+            race = get_monster_race(self.race)
+            if race is None:
+                return "?"
 
     def get_defense(self):
         # 没有防御力的，数据库保存的值为 -2
