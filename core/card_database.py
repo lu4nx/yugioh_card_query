@@ -159,6 +159,7 @@ class Card(object):
             race = get_monster_race(self.race)
             if race is None:
                 return "?"
+            return race
 
     def get_defense(self):
         # 没有防御力的，数据库保存的值为 -2
