@@ -411,7 +411,7 @@ class MainUI(Ui_MainWindow, QMainWindow):
 
     def save_picture(self):
         choose_file, _ = QFileDialog.getSaveFileName(self, "另存为",
-                                                     "*.png", "(*.png)")
+                                                     "card.png", "(*.png)")
         self.card_picture.pixmap().save(choose_file, "png")
 
     def copy_card_pic2clipboard(self):
